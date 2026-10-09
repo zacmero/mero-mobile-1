@@ -1,0 +1,21 @@
+# Personal device observations and raw host output
+logs/
+captures/
+private/
+*.pcap
+*.pcapng
+
+# Generated Java ME artifacts
+build/
+dist/
+out/
+.gradle/
+*.class
+*.jar
+*.jad
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
