@@ -92,3 +92,11 @@ v0.5 reads exactly fileSize bytes with a 4 KiB bound and premature EOF rejection
 4,628-byte JAR and 342-byte JAD were fully verified (first connection failed,
 retry passed). Owner says will install now; await readiness and retrieve response.
 Do not claim PONG until its ack matches the verified command ID.
+
+## Permission prompt sequencing
+
+Owner reported SecurityException during v0.5 launch: MIDlet state change
+prevented user permission confirmation. Host polls overlapped installation/launch
+and may have contributed; not proven. No more Bluetooth operations until owner
+relaunches verified v0.5, selects E:/, completes file-access prompts and confirms
+readiness. Last readback was the old v0.4 snapshot; no v0.5 PONG observed.

@@ -217,3 +217,16 @@ Both artifacts passed exact size and full-content readback before installation:
 | MeroFiles.jad | 342 | 05e41a53ef1a5e8e07c2d147889ea8266ced4a3bbf147f7897ceb7846bf5fe93 |
 
 The owner is installing v0.5; command acknowledgement remains pending.
+
+## Permission-lifecycle interruption during v0.5 launch
+
+While installing/launching v0.5, the owner reported SecurityException with
+wording: "for midilet state change, user permission confirmation cannot be
+continued" (owner transcription). Host Bluetooth polling overlapped this
+period and may have contributed to a MIDlet state transition; causality is
+not established. The last readbacks still contained the prior v0.4 snapshot.
+
+Do not rebuild or infer missing filesystem support from this exception.
+Stop Bluetooth traffic while the owner launches the already verified app,
+selects E:/, and completes permission prompts. Resume retrieval only after
+the owner confirms readiness. Retry result and PING/PONG remain pending.
