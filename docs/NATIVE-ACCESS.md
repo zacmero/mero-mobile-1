@@ -152,3 +152,17 @@ Because suite 3 was absent, this does not establish how the current suite's GFS
 URL behaves. No internal JAR header was read. The response also retains the serial
 observation: timeout at open comm:0. Automatic command or permission acceptance
 is not evidence of a successful serial connection. No native shell is obtained.
+
+
+## v0.9 access implementation
+
+The app now accepts OPEN with a supplied file: or gfs: URL, removing fixed suite
+number assumptions and enabling further route tests without binary replacement.
+Installed v0.9 JAR ownership was verified in suite 3. Java listed System/Java and
+read the installed JAR through file:///E:/System/Java/3.jar; the 64-byte header
+matched the local original exactly. Current-suite gfs access failed with
+ConnectionNotFoundException. A parent traversal request, file:///E:/../, failed
+with IllegalArgumentException. No installer metadata was changed.
+
+The native serial utility now supports --line-ending crlf in addition to the
+previous carriage-return terminator. A Java-closed retry is pending.

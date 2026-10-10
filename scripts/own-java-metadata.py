@@ -11,11 +11,11 @@ from gi.repository import GLib
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('address')
-parser.add_argument('--suite', type=int, required=True)
+parser.add_argument('--suite', type=int, help='Omit to locate the unique JAR matching the original size')
 parser.add_argument('--jar', type=Path, required=True, help='Known local original for suite verification')
 parser.add_argument('--channel', type=int, choices=range(1, 31), default=5)
 args = parser.parse_args()
-if not 0 <= args.suite <= 999 or not args.jar.is_file():
+if (args.suite is not None and not 0 <= args.suite <= 999) or not args.jar.is_file():
     parser.error('Supply a suite ID 0..999 and its known local JAR')
 expected = args.jar.read_bytes()
 if len(expected) > 1048576:
@@ -74,10 +74,19 @@ try:
             raise ValueError(name + ': metadata size mismatch')
         return data
 
-    prefix = str(args.suite)
+    if args.suite is None:
+        candidates = [name[:-4] for name, entry in entries.items()
+                      if re.fullmatch(r'[0-9]{1,3}\.jar', name)
+                      and str(entry.get('Type')) == 'file'
+                      and int(entry.get('Size', -1)) == len(expected)]
+        if len(candidates) != 1:
+            raise ValueError('Cannot identify a unique owned suite by size; supply --suite')
+        prefix = candidates[0]
+    else:
+        prefix = str(args.suite)
     if get(prefix + '.jar', 1048576) != expected:
         raise ValueError('Installed JAR differs from known original; refusing metadata read')
-    print('Installed JAR verified; suite ownership established', flush=True)
+    print('Installed JAR verified; owned suite=' + prefix, flush=True)
     summary = {}
     for extension in ('jdx', 'mss', 'raw'):
         name = prefix + '.' + extension
@@ -88,6 +97,10 @@ try:
     target = folder / (prefix + '-summary.json')
     target.write_text(json.dumps(summary, indent=2) + '\n')
     target.chmod(0o600)
+    current = folder / 'current.json'
+    current.write_text(json.dumps({'suite': int(prefix), 'jar_sha256': hashlib.sha256(expected).hexdigest(),
+                                  'gfs_url': 'gfs://java/' + prefix + '.jar'}) + '\n')
+    current.chmod(0o600)
 except Exception as error:
     print('Owned Java metadata failed:', str(error))
     raise SystemExit(1)

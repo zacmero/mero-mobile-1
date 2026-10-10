@@ -34,7 +34,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
 
     protected void startApp() {
         if (roots == null) {
-            roots = new List("MERO FILES v0.8 - storage", List.IMPLICIT);
+            roots = new List("MERO FILES v0.9 - storage", List.IMPLICIT);
             roots.addCommand(exit);
             roots.setCommandListener(this);
             try {
@@ -56,7 +56,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private void show(String message) {
-        status = new Form("MERO FILES v0.8");
+        status = new Form("MERO FILES v0.9");
         status.append(message);
         status.addCommand(exit);
         status.setCommandListener(this);
@@ -86,13 +86,17 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
                     String id = field(message, "id");
                     String command = field(message, "command");
                     if (id.length() > 0 && id.length() <= 64 && !id.equals(ack)
-                            && (command.equals("PING") || command.equals("INFO") || command.equals("SERIAL") || command.equals("PATHS"))) {
+                            && (command.equals("PING") || command.equals("INFO") || command.equals("SERIAL") || command.equals("PATHS") || command.equals("OPEN"))) {
                         commandStatus = "accepted " + command;
                         ack = id;
                         if (command.equals("SERIAL")) {
                             stage = "probe Java serial";
                             serialReport = probeSerial();
                             result = "SERIAL DONE";
+                        } else if (command.equals("OPEN")) {
+                            stage = "open requested route";
+                            pathReport = probeUrls(new String[] { field(message, "url") });
+                            result = "OPEN DONE";
                         } else if (command.equals("PATHS")) {
                             stage = "probe filesystem routes";
                             pathReport = probePaths();
@@ -159,13 +163,17 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             + "\nheap_total=" + vm.totalMemory() + "\ncolors=" + Display.getDisplay(this).numColors()
             + "\nfileconnection_version=" + property("microedition.io.file.FileConnection.version")
             + "\nmedia_version=" + property("microedition.media.version")
-            + "\napp_version=0.8\nphone_time_ms=" + System.currentTimeMillis()
+            + "\napp_version=0.9\nphone_time_ms=" + System.currentTimeMillis()
             + "\n" + capabilities + serialReport + pathReport + "end=1\n";
     }
 
     private String probePaths() throws Exception {
         String[] urls = { "file:///E:/", "file:///C:/", "file:///D:/", "file:///A:/",
-            "file:///F:/", "file:///Z:/", "gfs://java/3.jar" };
+            "file:///F:/", "file:///Z:/" };
+        return probeUrls(urls);
+    }
+
+    private String probeUrls(String[] urls) throws Exception {
         StringBuffer data = new StringBuffer();
         for (int i = 0; i < urls.length && !stopped; i++) {
             PathProbe probe = new PathProbe(urls[i], i);
@@ -196,25 +204,42 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             String prefix = "path_" + number + "_";
             StringBuffer data = new StringBuffer(prefix + "url=" + url + "\n");
             try {
-                connection = Connector.open(url);
+                if (url.length() == 0 || url.length() > 256 || url.indexOf('\n') >= 0 || url.indexOf('\r') >= 0
+                        || !(url.startsWith("file:") || url.startsWith("gfs:")))
+                    throw new IllegalArgumentException("Use a file or gfs URL up to 256 characters");
+                connection = Connector.open(url, Connector.READ);
                 if (cancelled) return;
                 data.append(prefix).append("class=").append(connection.getClass().getName()).append('\n');
                 if (connection instanceof FileConnection) {
                     FileConnection file = (FileConnection) connection;
                     data.append(prefix).append("exists=").append(file.exists()).append('\n');
-                    if (file.exists()) data.append(prefix).append("directory=").append(file.isDirectory()).append('\n');
+                    if (file.exists()) {
+                        data.append(prefix).append("directory=").append(file.isDirectory()).append('\n');
+                        if (file.isDirectory()) {
+                            Enumeration entries = file.list();
+                            int count = 0;
+                            while (entries.hasMoreElements() && count < 40 && !cancelled) {
+                                String name = (String) entries.nextElement();
+                                data.append(prefix).append("entry_").append(count++).append('=')
+                                    .append(name.replace('\n', ' ').replace('\r', ' ')).append('\n');
+                            }
+                            data.append(prefix).append("listing_truncated=").append(entries.hasMoreElements()).append('\n');
+                        } else data.append(prefix).append("bytes=").append(file.fileSize()).append('\n');
+                    }
                 }
-                if (url.equals("gfs://java/3.jar") && connection instanceof StreamConnection) {
+                if (connection instanceof StreamConnection && (!(connection instanceof FileConnection)
+                        || (((FileConnection) connection).exists() && !((FileConnection) connection).isDirectory()))) {
                     InputStream input = ((StreamConnection) connection).openInputStream();
                     try {
                         StringBuffer hex = new StringBuffer();
                         String digits = "0123456789abcdef";
-                        for (int i = 0; i < 16 && !cancelled; i++) {
+                        long limit = connection instanceof FileConnection ? Math.min(((FileConnection) connection).fileSize(), 64) : 16;
+                        for (int i = 0; i < limit && !cancelled; i++) {
                             int c = input.read();
                             if (c < 0) break;
                             hex.append(digits.charAt((c & 255) >> 4)).append(digits.charAt(c & 15));
                         }
-                        data.append(prefix).append("owned_jar_header_hex=").append(hex).append('\n');
+                        data.append(prefix).append("header_hex=").append(hex).append('\n');
                     } finally { input.close(); }
                 }
                 data.append(prefix).append("status=opened\n");

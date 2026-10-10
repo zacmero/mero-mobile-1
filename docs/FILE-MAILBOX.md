@@ -341,3 +341,47 @@ for the previously saved command. See [every field and its interpretation](CAPAB
 Storage capacity and Java serial/capture/API evidence are now recorded;
 OS/vendor properties remain unavailable. A passive native SPP connection
 succeeded but produced no unsolicited data or shell evidence.
+
+
+## v0.9 remote file access
+
+OPEN accepts a host-selected file: or gfs: URL (maximum 256 characters), opens
+it read-only in an eight-second worker, reports its implementation class, and
+lists at most 40 folder entries or reads a bounded file header. FileConnection
+headers are limited to the smaller of the reported file size and 64 bytes; other
+stream headers are capped at 16 bytes. No file writes or execution are performed.
+PATHS no longer assumes an installer slot. A new installation can change that
+slot; verify its JAR via native FTP before reading an internal installer URL.
+
+Example (substitute the paired address):
+
+```sh
+rtk proxy python scripts/file-mailbox.py PHONE_ADDRESS --command OPEN \
+  --url file:///E:/System/Java/ --ftp-channel 5 --opp-channel 1 \
+  --permission-wait 15
+```
+
+The owner still needs to accept each native OPP command transfer. OPEN DONE means
+the request produced observations; inspect path_0_status, exists, error and any
+header/listing fields to determine whether access succeeded.
+
+v0.9 compiled and delivered with full saved-size and byte-for-byte verification:
+JAR 11,361 bytes, SHA-256
+b2a4cb5d550fd7e0c2961555bdc4eab60caa558173fea191bffa6e469b5eae5b;
+JAD 380 bytes, SHA-256
+972ebb5f70daba6576216811fd94d4598961ceeb9469314a7b5b8b65a589175f.
+Live OPEN results are pending.
+
+
+### v0.9 confirmed operations
+
+OPEN successfully listed E:/System/Java/ (20 entries, not truncated). Native FTP
+then located the uniquely sized current JAR automatically, established suite 3
+ownership by full-content comparison, and read only its installer metadata.
+
+OPEN gfs://java/3.jar returned ConnectionNotFoundException even with the current
+verified suite present. OPEN file:///E:/System/Java/3.jar succeeded, reported
+11,361 bytes, and returned a 64-byte header exactly matching the local original.
+Thus the ordinary file API provides the working installer-file route; GFS does
+not provide a working route in this test. This is read access, not native code
+execution or a shell. Future access can use OPEN without another app rebuild.

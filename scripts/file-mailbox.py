@@ -33,7 +33,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('address', help='Paired phone Bluetooth address')
     parser.add_argument('--folder', default='MeroMailbox', help='Mailbox path relative to OBEX root')
-    parser.add_argument('--command', choices=('PING', 'INFO', 'SERIAL', 'PATHS'), help='Omit to read startup diagnostics')
+    parser.add_argument('--command', choices=('PING', 'INFO', 'SERIAL', 'PATHS', 'OPEN'), help='Omit to read startup diagnostics')
+    parser.add_argument('--url', help='File or gfs URL for OPEN; lists folders or reads a bounded header')
     parser.add_argument('--transport', choices=('opp', 'ftp'), default='opp', help='Command delivery; OPP works on this phone')
     parser.add_argument('--inbox', default='Ebook', help='OBEX folder where native OPP saves command.txt')
     parser.add_argument('--ftp-channel', type=int, choices=range(1, 31), help='Measured FTP RFCOMM channel')
@@ -41,6 +42,11 @@ def main():
     parser.add_argument('--timeout', type=int, default=60)
     parser.add_argument('--permission-wait', type=int, default=0, help='Seconds of Bluetooth silence after command reception')
     args = parser.parse_args()
+    if args.command == 'OPEN':
+        if not args.url or len(args.url) > 256 or any(c in args.url for c in ('\n', '\r')) or not args.url.startswith(('file:', 'gfs:')):
+            parser.error('OPEN requires a file or gfs --url of at most 256 characters')
+    elif args.url is not None:
+        parser.error('--url requires --command OPEN')
     if args.timeout < 1 or args.timeout > 300:
         parser.error('Timeout must be 1..300 seconds')
     if not 0 <= args.permission_wait <= 120:
@@ -49,7 +55,8 @@ def main():
         parser.error('Use a mailbox folder path without dot components')
     command_id = str(time.time_ns()) if args.command else None
     command = (('protocol=mero-files/1\nid=' + command_id + '\ncommand='
-                + args.command + '\nend=1\n').encode('utf-8') if args.command else None)
+                + args.command + ('\nurl=' + args.url if args.command == 'OPEN' else '')
+                + '\nend=1\n').encode('utf-8') if args.command else None)
     if command is not None:
         logs = Path(__file__).resolve().parent.parent / 'logs'
         logs.mkdir(exist_ok=True)
@@ -162,6 +169,8 @@ def main():
                             raise ValueError('PING did not return PONG')
                         if args.command == 'PATHS' and fields['result'] != 'PATHS DONE':
                             raise ValueError('PATHS did not complete')
+                        if args.command == 'OPEN' and fields['result'] != 'OPEN DONE':
+                            raise ValueError('OPEN did not complete')
                         if args.command == 'SERIAL' and fields['result'] != 'SERIAL DONE':
                             raise ValueError('SERIAL did not complete')
                         if args.command == 'INFO' and fields['result'] != 'INFO OK':
