@@ -397,3 +397,10 @@ uses comm:0 without optional flags. For this experiment allow network silence
 through the opening window, for example --permission-wait 100 with --timeout 150.
 Other operations and their bounds are unchanged. Live serial connectivity is
 not yet confirmed.
+
+
+The host CLI supports --send-attempts 1..6 for transient OPP failures. Retries
+reuse the same command ID and exact bytes, preventing a received retry from
+starting a second operation. After successful delivery, permission waiting and
+full-content readback run once; response-readback failures do not resend a fresh
+operation automatically.

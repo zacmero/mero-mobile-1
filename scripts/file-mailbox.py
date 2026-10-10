@@ -41,6 +41,7 @@ def main():
     parser.add_argument('--opp-channel', type=int, choices=range(1, 31), help='Measured OPP RFCOMM channel')
     parser.add_argument('--timeout', type=int, default=60)
     parser.add_argument('--permission-wait', type=int, default=0, help='Seconds of Bluetooth silence after command reception')
+    parser.add_argument('--send-attempts', type=int, choices=range(1, 7), default=1, help='Retry OPP delivery using the same command ID')
     args = parser.parse_args()
     if args.command == 'OPEN':
         if not args.url or len(args.url) > 256 or any(c in args.url for c in ('\n', '\r')) or not args.url.startswith(('file:', 'gfs:')):
@@ -70,7 +71,14 @@ def main():
             source.write_bytes(command)
             push_channel = ['--channel', str(args.opp_channel)] if args.opp_channel is not None else []
             read_channel = ['--channel', str(args.ftp_channel)] if args.ftp_channel is not None else []
-            subprocess.run([sys.executable, str(scripts / 'send-bluetooth.py'), args.address, str(source)] + push_channel, check=True)
+            for attempt in range(args.send_attempts):
+                delivery = subprocess.run([sys.executable, str(scripts / 'send-bluetooth.py'), args.address, str(source)] + push_channel)
+                if delivery.returncode == 0:
+                    break
+                if attempt + 1 == args.send_attempts:
+                    delivery.check_returncode()
+                print('Retrying OPP delivery with the same command ID', flush=True)
+                time.sleep(2)
             if args.permission_wait:
                 print('Waiting for phone permission prompts before Bluetooth readback', flush=True)
                 time.sleep(args.permission_wait)
