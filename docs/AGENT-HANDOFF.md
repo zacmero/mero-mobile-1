@@ -233,3 +233,24 @@ is now pure white text/links on black with monospace and cryptic RX/TX labels.
 HTML body attributes are the fallback; input CSS/WML appearance may depend on
 browser support. Port-80 firewall authorization is still time-limited.
 No native OS shell or exact chipset identity has been obtained.
+
+## Current native-access evidence
+
+The owner prioritizes learning/native shell access and asked to stop appearance
+work. White-on-black works in Firefox but not on the phone. No About/Version UI
+exists in menus the owner checked; do not repeat that request. Native Wi-Fi
+connect checks refused all 22 common service ports. Full TCP scan was stopped
+incomplete after slow progress and increased phone latency, not a complete
+negative scan. A fresh native FTP root has 11 entries and rejects parent
+navigation; metadata only was inspected. No firmware tree or Device ID clue
+was exposed.
+
+Matomo's maintained OS regex maps Dorado WAP-Browser to Mocor OS, strengthening
+a Mocor-family hypothesis, while exact chipset/firmware remain unknown. The
+Spreadtrum UA profile cannot currently be retrieved and has no snapshot in the
+archive availability response. Candidate next software route: check whether a
+native application runtime such as MRP is actually supported. Public Mythroad
+SDK sources exist, but no runtime support or executable compatibility has been
+demonstrated on this phone. No native package or loader has been executed.
+The optional /link/probe browser page is deployed, but no phone callback has been
+captured and it cannot access native files or execute OS commands.

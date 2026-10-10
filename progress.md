@@ -70,3 +70,22 @@ and links on black, with optional inline CSS for input fields. The measured
 5.659-second reply acknowledgement spans the update and is not screen latency.
 No phone binary update was needed. Source compilation and live phone checks
 were performed; no automated tests were added or run.
+
+## Native investigation resumed
+
+Stopped visual adjustments after owner confirmed Firefox applies colors while
+the phone does not. Added optional bounded read-only browser reporting at
+/link/probe; compiled and restarted the service. User prioritized shell/native
+access, so no phone probe-page run was requested. Connect-only scan of 22 native
+TCP service ports returned refusal for all. Started a rate-limited full TCP scan.
+Research found Matomo's Dorado-to-Mocor classifier rule; this narrows the platform
+hypothesis without confirming hardware. Archived UA profile lookup found no
+snapshot. Sent About/Version instructions through RX; phone acknowledged them.
+
+Full TCP scan stopped incomplete after about 2.5 minutes; progress was only about
+8% and ping latency increased. No exhaustive negative result is claimed.
+Owner reports no About/Version screen anywhere in the menus. A fresh native FTP
+session listed 11 root entries, rejected parent navigation and reset to the same
+root. Only metadata was read; no firmware exposed. Cached Device ID is absent.
+Research found Mythroad native-app SDK sources as a possible additional route;
+phone runtime support is unconfirmed. Visual adjustments remain stopped.

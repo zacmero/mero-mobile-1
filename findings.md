@@ -52,3 +52,17 @@ then about 2.35 seconds after reducing the delay to one second. Computer-message
 follow-up acknowledgement took 5.659 seconds across the update, not a directly
 measured display latency. HTML is now pure white on black with monospace RX/TX
 labels. The exact SoC/OS and any native shell remain unconfirmed.
+
+## Native investigation resumed
+
+The owner confirms the specified white-on-black colors work in Firefox but not
+on the phone. Leave the appearance alone; do not claim phone dark mode works.
+All 22 initially checked Wi-Fi TCP service ports refused connections. The subsequent full TCP scan was stopped incomplete after slowing progress
+and increased phone response latency; remaining ports are not ruled out. No native Wi-Fi service is yet identified.
+Matomo's OS classifier maps the observed Dorado browser to Mocor OS; this is
+supporting evidence for a Mocor-family hypothesis, not exact firmware/SoC proof.
+A firmware/About screenshot is requested. The reported UA profile is unavailable
+and Internet Archive returned no snapshot. Optional browser capability probe
+implementation is deployed; no genuine phone callbacks have yet been captured.
+
+The owner reports no firmware/About screen after searching the menus. Native FTP root lists 11 entries, rejects parent navigation and exposes no new firmware tree in the tested view. No Device ID modalias or cached Device ID service is reported. Native MRP runtime support is an unconfirmed candidate to investigate; no native payload has been built or executed.

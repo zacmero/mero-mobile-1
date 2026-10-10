@@ -271,3 +271,59 @@ The owner requested ending the Bluetooth serial route. Do not restart those
 experiments or USB monitoring without new direction. The current software
 route is the native Wi-Fi browser endpoint in [HTTP-LINK.md](HTTP-LINK.md).
 No bootloader response, loader execution, firmware write or OS shell was obtained.
+
+## Wi-Fi native-service investigation
+
+The native browser link improves coordination but does not expose native files
+or a shell. The owner requested returning to native-access investigation.
+A connect-only check of 22 TCP ports on the phone's confirmed Wi-Fi address
+returned connection refusal for every port: 21, 22, 23, 80, 135, 139, 443, 445,
+554, 631, 1234, 2323, 5000, 5037, 5554, 5555, 8000, 8080, 8081, 8443, 9000, 10000.
+No application commands were sent. This excludes a listening service on those
+ports at that time, not every possible native interface. A full TCP check was stopped after partial progress because it was slow and
+phone response latency increased during it. Its incomplete result cannot
+exclude services on the remaining ports.
+
+Matomo's maintained [OS recognition rules](https://github.com/matomo-org/device-detector/blob/master/regexes/oss.yml)
+classify Dorado WAP-Browser as Mocor OS. This supports a Mocor-family inference
+from the observed browser string; it is not direct firmware/SoC identification.
+The reported Spreadtrum 6600L_DORADO profile hostname does not resolve here,
+and the Internet Archive availability endpoint returned no archived snapshot.
+Repository/issue searches did not provide a matching SC6600L or N2322 source.
+The [Spreadtrum dumper project](https://github.com/ilyakurdyukov/spreadtrum_flash)
+documents feature-phone support for SC6530/SC6531DA/SC6531E, not a confirmed
+loader for this device. No loader was selected or executed.
+
+Next identifying evidence requested through RX: a built-in About/Version screen
+showing firmware/build string, without IMEI/serial identifiers. Do not assume a
+standard shell exists or choose a chipset-specific native payload from the
+browser profile alone.
+
+An optional read-only browser probe is available at /link/probe and via the
+HTML inbox SCAN link. It records same-phone HTML resource and JavaScript
+callbacks privately, including browser-visible display and API fields. It does
+not read the native filesystem or execute native commands. No phone callback
+has yet been recorded; missing callbacks alone would not prove JavaScript absent.
+
+### Native file root and missing firmware menu
+
+The owner checked the menus and reports no About/Version/System-information
+screen. Do not keep requesting that same absent screen. A fresh native OBEX FTP
+session listed 11 root entries; parent navigation was rejected, and root reset
+returned the same 11 entries. Only metadata was inspected; no contents were read
+or changed. No firmware dump or native parent filesystem was exposed by this
+probe. BlueZ also reported no Device ID modalias or cached Device ID service.
+
+A possible additional software route is a native application runtime. The
+[Mythroad MRP builder source](https://github.com/M-CAP7AIN/mythroad_mrpbuilder)
+describes an ARM-based application SDK, and the
+[Mythroad SDK archive](https://github.com/vmrp/MythroadSDK) documents an older
+Lua-based variant. Neither source establishes that this phone supports MRP.
+No matching MRP/Mythroad runtime marker was demonstrated in the current file
+view. Check actual non-Java application support before building or executing a
+native package. Native execution, if possible, would still need a console
+interface to meet the shell goal.
+
+The phone's white-on-black appearance failed despite the same page displaying
+those colors in Firefox. Leave the appearance alone; this observation does not
+prove every CSS feature or browser scripting feature is absent.

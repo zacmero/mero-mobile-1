@@ -130,11 +130,14 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(400, 'Invalid diagnostics\n')
 
     def browser_link(self, url):
-        if len(self.path) > 2048 or url.path not in ('/link', '/link.wml', '/link/status', '/link/send', '/link/inbox', '/link/inbox.wml'):
+        if len(self.path) > 2048 or url.path not in ('/link', '/link.wml', '/link/status', '/link/send', '/link/inbox', '/link/inbox.wml', '/link/probe', '/link/probe/report'):
             self.reply(404, 'Not found\n')
             return
         wants_wml = url.path.endswith('.wml') or ('wml' in self.headers.get('Accept', '').lower()
                                               and 'text/html' not in self.headers.get('Accept', '').lower())
+        if url.path in ('/link/probe', '/link/probe/report'):
+            self.browser_probe(url)
+            return
         if url.path in ('/link/inbox', '/link/inbox.wml'):
             self.browser_inbox(url, wants_wml)
             return
@@ -222,8 +225,47 @@ class Handler(BaseHTTPRequestHandler):
                     + escape(target) + '"></head><body bgcolor="#000000" text="#ffffff" link="#ffffff" vlink="#ffffff" alink="#ffffff">'
                     '<font face="monospace" size="2"><h3>MERO // RX</h3><p>LINK: ONLINE // RX: 1s</p>'
                     + entries + '<p><a href="' + escape(target) + '">SYNC</a> | '
-                    '<a href="/link">TX</a></p></font></body></html>\n')
+                    '<a href="/link">TX</a> | <a href="/link/probe">SCAN</a></p></font></body></html>\n')
             self.reply(200, body, 'text/html')
+
+    def browser_probe(self, url):
+        if url.path == '/link/probe/report':
+            try:
+                fields = parse_qs(url.query, strict_parsing=True, max_num_fields=16)
+                allowed = {'phase', 'app', 'version', 'platform', 'language', 'width', 'height',
+                           'depth', 'xhr', 'json', 'fetch', 'cookies'}
+                if set(fields) - allowed or any(len(value) != 1 or len(value[0]) > 256 for value in fields.values()):
+                    raise ValueError('Invalid probe')
+                values = {key: value[0] for key, value in fields.items()}
+                if values.get('phase') not in ('html', 'js'):
+                    raise ValueError('Invalid phase')
+            except ValueError:
+                self.reply(400, 'Invalid probe\n')
+                return
+            event = {'received_at': datetime.now(timezone.utc).isoformat(),
+                     'remote_address': self.client_address[0], 'user_agent': self.headers.get('User-Agent', ''),
+                     'fields': values}
+            with lock:
+                path = LOGS / 'browser-probes.jsonl'
+                with path.open('a') as stream:
+                    stream.write(json.dumps(event) + '\n')
+                path.chmod(0o600)
+            self.reply(200, 'OK\n')
+            return
+        self.reply(200, '<html><head><title>MERO // SCAN</title>'
+                   '<meta http-equiv="refresh" content="12;url=/link/inbox"></head><body>'
+                   '<h3>SCAN // BROWSER</h3><p>Read-only capability check. Return to RX after 12 seconds.</p>'
+                   '<img src="/link/probe/report?phase=html" width="1" height="1" alt="">'
+                   '<script type="text/javascript">try {'
+                   'var n=navigator,s=typeof screen=="undefined"?{}:screen;'
+                   'var e=typeof encodeURIComponent=="undefined"?escape:encodeURIComponent;'
+                   'var q="phase=js";function put(k,v){q+="&"+k+"="+e(String(v).substring(0,256));}'
+                   'put("app",n.appName);put("version",n.appVersion);put("platform",n.platform);'
+                   'put("language",n.language||n.userLanguage);put("width",s.width);put("height",s.height);'
+                   'put("depth",s.colorDepth);put("xhr",typeof XMLHttpRequest);put("json",typeof JSON);'
+                   'put("fetch",typeof fetch);put("cookies",n.cookieEnabled);'
+                   'window.meroProbe=new Image();window.meroProbe.src="/link/probe/report?"+q;'
+                   '}catch(error){}</script><p><a href="/link/inbox">RX</a></p></body></html>', 'text/html')
 
     def do_POST(self):
         self.connection.settimeout(10)
