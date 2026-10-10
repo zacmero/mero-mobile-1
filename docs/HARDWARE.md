@@ -151,3 +151,12 @@ Java HTTP failed at response status and TCP failed at open TCP socket with
 ConnectionNotFoundException; native browser LAN access works. The observed
 Java network settings offer SIM/CMCC WAP/MMS profiles. The next measured
 experiment is filesystem access plus native Bluetooth mailbox transfer.
+
+## Working two-way file mailbox
+
+Verified Mero Files v0.5 read a 64-byte PING command from E:/Ebook/command.txt
+and wrote PONG to E:/MeroMailbox/response.txt. The computer retrieved the
+response through native Bluetooth FTP and confirmed the exact command ID
+acknowledgement. Native OPP receives commands with manual acceptance. Java
+filesystem read/write is therefore functional; the native OS and shell remain
+unidentified. See [mailbox evidence](FILE-MAILBOX.md) for the complete snapshot.

@@ -65,11 +65,11 @@ The first app should be a short, offline **Mero Hello** with screen size, heap n
 - [docs/HTTP-LINK.md](docs/HTTP-LINK.md) — LAN diagnostic server and GET/POST/TCP phone probe; browser reachability confirmed, Java HTTP and TCP attempts failed.
 
 - [docs/SCREEN-DIAGNOSTICS.md](docs/SCREEN-DIAGNOSTICS.md) — complete transcription and limits of the photographed runtime screen.
-- [docs/FILE-MAILBOX.md](docs/FILE-MAILBOX.md) — filesystem probe and native Bluetooth mailbox experiment.
+- [docs/FILE-MAILBOX.md](docs/FILE-MAILBOX.md) — working native Bluetooth / Java file mailbox with a verified PING/PONG round trip.
 
 ## Current state
 
-**First MIDlet milestone achieved.** Bluetooth delivery, Java installation and Mero Hello execution succeeded. The build targets CLDC 1.0 / MIDP 1.0; the phone reports CLDC 1.1 / MIDP 2.0. Canvas dimensions and optional API class presence are measured. USB detection, native OS, and actual optional API operation remain open. The next experiment is a file mailbox over native Bluetooth. See the hardware session log for results and the required received-file size check.
+**First MIDlet milestone achieved.** Bluetooth delivery, Java installation and Mero Hello execution succeeded. The build targets CLDC 1.0 / MIDP 1.0; the phone reports CLDC 1.1 / MIDP 2.0. Canvas dimensions and optional API class presence are measured. USB detection, native OS, and actual optional API operation remain open. A native Bluetooth / Java file mailbox now completed a verified PING/PONG round trip. Incoming-file acceptance remains manual; diagnostics are retrieved automatically. See the hardware session log for results and the required received-file size check.
 
 ## References
 

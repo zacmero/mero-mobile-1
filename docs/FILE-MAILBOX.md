@@ -1,5 +1,10 @@
 # Native Bluetooth / Java file mailbox
 
+**Milestone achieved:** a verified PING was read by Java and its matching
+PONG acknowledgement was retrieved by the computer through native OBEX FTP.
+Incoming command-file acceptance remains manual; this is not unattended
+operation, a native shell, or a guaranteed low-latency stream.
+
 The phone's Java Bluetooth API is unavailable and Java HTTP/TCP attempts have
 failed. The photographed diagnostics show FileConnection present, version 1.0.
 Mero Files tests actual storage access and a two-way mailbox transported by the
@@ -230,3 +235,42 @@ Do not rebuild or infer missing filesystem support from this exception.
 Stop Bluetooth traffic while the owner launches the already verified app,
 selects E:/, and completes permission prompts. Resume retrieval only after
 the owner confirms readiness. Retry result and PING/PONG remain pending.
+
+## Confirmed two-way milestone
+
+After relaunching verified v0.5 with Bluetooth idle during permission prompts,
+the owner reported `read 64 chars; protocol=mero-files/1; end=true`.
+The computer retrieved this snapshot through native FTP channel 5:
+
+| Field | Value |
+| --- | --- |
+| protocol | mero-files/1 |
+| seq | 4 |
+| ack | Exactly matched the verified command.txt PING ID |
+| result | PONG |
+| inbox_status | command exists; bytes=64; url=file:///E:/Ebook/command.txt |
+| command_status | read 64 chars; protocol=mero-files/1; end=true |
+| mailbox | file:///E:/MeroMailbox/ |
+| config | CLDC-1.1 |
+| profiles | MIDP-2.0 |
+| platform | j2me |
+| locale | zh-CN |
+| heap_free | 1755492 bytes |
+| heap_total | 2486656 bytes |
+| colors | 65535 |
+| fileconnection_version | 1.0 |
+| media_version | 1.2 |
+| end | 1 |
+
+The host compared ack against the original verified build/command.txt ID and
+required result=PONG. This establishes computer-to-phone command delivery,
+Java command reading/processing, Java response writing, and phone-to-computer
+response retrieval. It confirms that the bounded file-size read works for
+this command. It does not independently characterize every stream EOF behavior.
+
+The successful route is OPP command reception in Ebook plus FTP response reads
+in MeroMailbox. Keep the phone app running and accept each incoming command
+file. Finish Java permission prompts before Bluetooth retrieval; retry transient
+connection failures without assuming new files were delivered. INFO can request
+fresh automated runtime diagnostics using the same route. Native OS, shell,
+USB support, and unattended reception remain separate open questions.

@@ -100,3 +100,15 @@ prevented user permission confirmation. Host polls overlapped installation/launc
 and may have contributed; not proven. No more Bluetooth operations until owner
 relaunches verified v0.5, selects E:/, completes file-access prompts and confirms
 readiness. Last readback was the old v0.4 snapshot; no v0.5 PONG observed.
+
+## Achieved: verified two-way Java file mailbox
+
+Owner relaunched verified v0.5, completed permissions, and selected E:/ with
+Bluetooth idle. Java reported read 64 chars, protocol=mero-files/1, end=true.
+Host retrieved seq=4, result=PONG, and ack exactly matching the original verified
+PING command ID. Command route is native OPP -> Ebook/command.txt; response is
+Java -> E:/MeroMailbox/response.txt -> native FTP channel 5 -> host. See complete
+snapshot in FILE-MAILBOX.md. Incoming-file acceptance remains manual. Java file
+read/write and the actual two-way command round trip are now proven. Preserve
+v0.5: 4,628-byte JAR, 342-byte JAD; verify every new delivery before execution.
+No native shell/OS or unattended reception has been established.
