@@ -254,3 +254,13 @@ SDK sources exist, but no runtime support or executable compatibility has been
 demonstrated on this phone. No native package or loader has been executed.
 The optional /link/probe browser page is deployed, but no phone callback has been
 captured and it cannot access native files or execute OS commands.
+
+## Latest menu/label photos
+
+IMG_8381–IMG_8384 were inspected; see MENU-PHOTOS.md. Exact photographed label
+is Powerpack 4-GSTWF-4012, Model:N2322. The leading 4- is now confirmed; earlier
+shorter references are historical. Originals remain outside Git, especially the
+label photo containing SN/IMEI. No chipset is visible. Clock date 01.01.2011
+must not be treated as a firmware build. Multimedia > Games is highlighted but
+not opened. Requested the next submenu photo via RX and the user question tool.
+Native application runtime support remains unconfirmed.

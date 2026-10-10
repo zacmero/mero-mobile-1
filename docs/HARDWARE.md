@@ -194,3 +194,12 @@ monitor recorded zero events across the normal powered-off charging reconnect
 and these battery/boot-key experiments. No brief bootloader USB device was seen.
 This result does not by itself identify a chipset or prove that every boot-key
 combination/data-cable route is exhausted.
+
+## Photographed label and native menu
+
+Owner photos visually confirm the commercial label reads **4-GSTWF-4012**
+(including leading 4-), and Model:N2322. Four SIM positions and T-FLASH marking
+are visible. No chipset marking is exposed. Personal identifiers remain private.
+Multimedia includes Games, but its submenu is not yet shown. The standby
+01.01.2011 date is a clock display, not firmware identification.
+See [photo transcription](MENU-PHOTOS.md).

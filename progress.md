@@ -89,3 +89,5 @@ session listed 11 root entries, rejected parent navigation and reset to the same
 root. Only metadata was read; no firmware exposed. Cached Device ID is absent.
 Research found Mythroad native-app SDK sources as a possible additional route;
 phone runtime support is unconfirmed. Visual adjustments remain stopped.
+
+Inspected all four new owner photos. Transcribed the visible menus and non-sensitive label fields in docs/MENU-PHOTOS.md. Corrected exact commercial label to 4-GSTWF-4012 and visually corroborated N2322. Requested the submenu after pressing OK on Multimedia > Games; current photos stop one level above it. Originals, SN and IMEI remain outside tracked documentation.
