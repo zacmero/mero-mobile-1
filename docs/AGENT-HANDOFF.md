@@ -161,3 +161,15 @@ USB watcher is active as exec session 18312 and records logs/usb-events.jsonl
 continuously. Power-off/USB-reconnect showed charging and no USB events.
 Owner was asked to try holding centre/OK on reconnect; await that result.
 No board work, firmware write, or loader execution has been performed.
+
+## Latest battery/label evidence
+
+Owner completed centre/OK and battery-removal/reinsertion steps: no response,
+zero USB events in continuous monitoring. Without battery the phone does not
+turn on in their tested setup; it operates only with battery installed.
+Board-covering label reports model N2322. Full owner-supplied SN and IMEI are
+in private/DEVICE-LABEL.md (ignored, 0600); never stage/repeat those publicly.
+Exterior name remains Powerpack GSTWF-4012; exact chipset/OS still unknown.
+Owner may remove label/photograph board later; do not shift to hardware now.
+USB watcher session 18312 remains active. Other boot-key/cable routes are not
+proven exhausted.

@@ -2,7 +2,7 @@
 
 **Computer archaeology / Java ME / embedded systems learning lab**
 
-Target: **Powerpack GSTWF-4012** (four-SIM feature phone).
+Target: **Powerpack GSTWF-4012** (four-SIM feature phone); board-covering label reports **model N2322**.
 
 This repository documents and experiments with an unusual older mobile phone. The goal is to learn **Java ME programming, USB/Bluetooth and networking, constrained-device interfaces, and the operating system beneath the vendor menus**. It is an experimental learning project, not a production phone or a firmware replacement project.
 

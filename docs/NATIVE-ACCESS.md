@@ -80,10 +80,19 @@ snapshot is insufficient.
 The first cold-boot experiment unplugged USB, powered the phone off, and
 reconnected USB without switching it on. The owner observed charging; the
 continuous monitor recorded no USB events. A centre/OK boot-key trial was then
-requested with the monitor still running. Its result is pending.
+requested with the monitor still running. The owner subsequently completed both battery-related steps and reported no
+response. The monitor recorded zero USB events. The owner reports that the
+phone does not turn on without its battery and works only with the battery
+installed in the tested setup. No bootloader enumeration was observed.
 
 Supported Spreadtrum feature-phone tools document transient USB ID 1782:4d00
 and model-dependent boot keys. This is a candidate discovery route, not an
 established identifier for this handset. Chipset-specific loaders are not yet
 selected or executed. See the primary
 [Spreadtrum dumper instructions](https://github.com/ilyakurdyukov/spreadtrum_flash).
+
+## Newly observed label
+
+The board-covering label reports model N2322. Owner-supplied SN and IMEI are
+preserved exactly in private/DEVICE-LABEL.md and excluded from public Git.
+No chipset inference is made from this model. Board inspection remains deferred.

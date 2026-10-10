@@ -175,3 +175,22 @@ Native RFCOMM channel 3 (sprd_com3) accepted a host connection. A passive
 eight-second read received no data; zero application bytes were sent. This
 proves service reachability, not a native console, shell, modem protocol,
 specific chipset, or OS.
+
+## Board-covering label and battery/boot trial
+
+The owner read a label covering the board: **model N2322**. A serial number and
+IMEI were also provided and preserved exactly in private/DEVICE-LABEL.md,
+which is gitignored and mode 0600. They are redacted from public documentation.
+This label adds an internal model identifier alongside the exterior/commercial
+Powerpack GSTWF-4012 identity; it does not establish the chipset or native OS.
+No board photograph or chip marking has yet been inspected. Label removal and
+board photography are deferred by the owner.
+
+The owner completed the centre/OK USB boot-key trial, including the suggested
+battery removal/reinsertion sequence, and reported no response. They also
+observed that the phone will not turn on without its battery; it works only
+with the battery installed in their tested setup. The continuously running USB
+monitor recorded zero events across the normal powered-off charging reconnect
+and these battery/boot-key experiments. No brief bootloader USB device was seen.
+This result does not by itself identify a chipset or prove that every boot-key
+combination/data-cable route is exhausted.
