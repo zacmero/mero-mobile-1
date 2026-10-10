@@ -166,3 +166,54 @@ with IllegalArgumentException. No installer metadata was changed.
 
 The native serial utility now supports --line-ending crlf in addition to the
 previous carriage-return terminator. A Java-closed retry is pending.
+
+
+## Coordinated serial and native AT routes
+
+With Java closed, current SDP exposed FTP channel 5 but no SPP channel; a raw
+channel-3 connection was refused. A coordinated host-client retry while SERIAL
+opened comm:0 timed out. After the owner allowed the local-connection prompt,
+a fresh matching Java response reported serial_status=error at open comm:0,
+with java.io.IOException: open failed. Neither client retry exchanged Java data.
+
+Current native SDP exposes Hands-Free Gateway on channel 4 and Headset Gateway
+on channel 6. A channel-4 RFCOMM session answered AT+BRSF=0 with +BRSF: 33 and OK,
+and AT+CIND=? with service (0-1), call (0-1), callsetup (0-3) and OK.
+AT+CGMI, AT+CGMM, AT+CGMR and AT+CLAC each returned ERROR. This is a working native
+AT interpreter with a limited tested command set, not an OS shell. No dialing,
+call control or contact queries were sent. Raw responses remain private.
+
+Owner-observed activating/device-discovery failure during comm:0 suggests an
+outgoing Bluetooth route, but the mapping remains unproven. A host SPP server
+was implemented with BlueZ ProfileManager and paired-device filtering. Initial
+channel 7 registration returned success but the Bluetooth journal revealed
+rfcomm_bind Address already in use. No server was listening there. Channel 22
+registration subsequently advertised Serial Port in the adapter UUIDs. Startup
+now requires that advertisement check. The server replies only to five known
+Java test queries and does not execute received input.
+
+References: BlueZ ProfileManager API and src/profile.c, and the Spreadtrum
+spd_dump.c CHECK_BAUD implementation (one 0x7e byte). A version-probe option was
+implemented, but its connection was refused before the byte could be sent.
+No bootloader version, loader execution or firmware memory access was obtained.
+
+
+With the channel-22 server confirmed advertised, the next 66-byte SERIAL
+command passed full saved-size and content readback and its matching response
+still reported IOException: open failed. The host received no SPP connection.
+A paired-device service refresh/manual Serial Port selection is the next live
+step; no Java-to-host serial round trip is established yet.
+
+Run the native host server with:
+
+```sh
+rtk proxy python scripts/java-serial-server.py PHONE_ADDRESS --duration 900
+```
+
+It registers SPP on channel 22 by default, requires pairing, accepts only the
+specified device and makes the adapter discoverable for the bounded run. On
+normal exit it unregisters the profile and restores prior discovery settings.
+A server registration response alone is insufficient: startup also checks the
+Serial Port UUID advertisement because BlueZ can silently fail a channel bind.
+See the [BlueZ ProfileManager API](https://github.com/bluez/bluez/blob/master/doc/org.bluez.ProfileManager.rst)
+and [profile implementation](https://github.com/bluez/bluez/blob/master/src/profile.c).

@@ -13,8 +13,16 @@ parser.add_argument('--channel', type=int, choices=range(1, 31), default=3)
 parser.add_argument('--inquiry', action='store_true', help='Refresh discovery before connecting')
 parser.add_argument('--identify', action='store_true', help='Send only basic AT identity queries')
 parser.add_argument('--line-ending', choices=('cr', 'crlf'), default='cr', help='AT query terminator')
+parser.add_argument('--boot-version', action='store_true', help='Send one Spreadtrum CHECK_BAUD byte (0x7e); no loader or writes')
+parser.add_argument('--java-bridge', action='store_true', help='Reply to the known Java SERIAL identity queries; never execute peer input')
+parser.add_argument('--handsfree-identify', action='store_true', help='Query a measured HFP gateway channel; no dialing or call control')
+parser.add_argument('--connect-wait', type=int, default=0, help='Retry refused connections for up to 30 seconds')
 parser.add_argument('--hold', action='store_true', help='Keep the connection open after probing')
 args = parser.parse_args()
+if not 0 <= args.connect_wait <= 30:
+    parser.error('--connect-wait must be 0..30 seconds')
+if args.java_bridge and (args.identify or args.boot_version or args.hold or args.handsfree_identify):
+    parser.error('--java-bridge cannot be combined with other probe modes or --hold')
 if args.inquiry:
     subprocess.run(['bluetoothctl', '--timeout', '12', 'scan', 'on'],
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=20)
@@ -30,11 +38,72 @@ def save():
 sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 sock.settimeout(8)
 try:
-    sock.connect((args.address, args.channel))
+    deadline = time.monotonic() + args.connect_wait
+    while True:
+        try:
+            sock.connect((args.address, args.channel))
+            break
+        except OSError:
+            if time.monotonic() >= deadline:
+                raise
+            sock.close()
+            time.sleep(0.25)
+            sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+            sock.settimeout(min(2, max(0.1, deadline - time.monotonic())))
     result['connected'] = True
     print('Native RFCOMM connected', flush=True)
-    if args.identify:
-        for command in ('AT', 'ATI', 'AT+CGMI', 'AT+CGMM', 'AT+CGMR'):
+    if args.java_bridge:
+        replies = {b'AT': b'OK', b'ATI': b'MERO HOST BRIDGE', b'AT+CGMI': b'Mero',
+                   b'AT+CGMM': b'Computer bridge', b'AT+CGMR': b'mero-bridge/1'}
+        result['bridge'] = []
+        sock.settimeout(0.25)
+        pending = bytearray()
+        received = 0
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline and received < 8192:
+            try:
+                chunk = sock.recv(min(4096, 8192 - received))
+                if not chunk:
+                    break
+                received += len(chunk)
+                pending.extend(chunk)
+                while b'\r' in pending:
+                    line, remainder = bytes(pending).split(b'\r', 1)
+                    pending = bytearray(remainder)
+                    line = line.strip(b'\n')
+                    reply = replies.get(line)
+                    event = {'received_hex': line.hex(), 'sent_hex': ''}
+                    if reply is not None:
+                        message = b'\r\n' + reply + b'\r\n'
+                        sock.sendall(message)
+                        event['sent_hex'] = message.hex()
+                        print('Replied to Java query ' + line.decode('ascii'), flush=True)
+                    result['bridge'].append(event)
+                    save()
+            except TimeoutError:
+                pass
+        result['bridge_received_bytes'] = received
+        result['bridge_pending_hex'] = pending.hex()
+        print('Bridge received ' + str(received) + ' bytes', flush=True)
+    if args.boot_version:
+        sock.sendall(b'\x7e')
+        sock.settimeout(3)
+        data = bytearray()
+        deadline = time.monotonic() + 4
+        while len(data) < 8192 and time.monotonic() < deadline:
+            try:
+                chunk = sock.recv(min(4096, 8192 - len(data)))
+                if not chunk:
+                    raise ConnectionError('Serial peer closed the connection')
+                data.extend(chunk)
+            except TimeoutError:
+                break
+        result['boot_version_probe'] = {'sent_hex': '7e', 'response_hex': data.hex()}
+        print('CHECK_BAUD: ' + str(len(data)) + ' response bytes', flush=True)
+        save()
+    if args.identify or args.handsfree_identify:
+        commands = ('AT+BRSF=0', 'AT+CIND=?', 'AT+CGMI', 'AT+CGMM', 'AT+CGMR', 'AT+CLAC') if args.handsfree_identify else ('AT', 'ATI', 'AT+CGMI', 'AT+CGMM', 'AT+CGMR')
+        for command in commands:
             sock.sendall((command + ('\r\n' if args.line_ending == 'crlf' else '\r')).encode('ascii'))
             sock.settimeout(3)
             data = bytearray()
