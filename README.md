@@ -10,12 +10,12 @@ This repository documents and experiments with an unusual older mobile phone. Th
 
 - A dedicated **Java** menu exists, including **Application manager**, **Local install**, **Download**, and connection settings for SIM cards.
 - **Wi-Fi works**: the phone connected to the owner's local wireless network.
-- **Bluetooth is present**, but its advertised services and supported file-transfer profiles have not yet been documented.
+- **Bluetooth works:** pairing, OBEX service discovery and file transfer to microSD are confirmed. Verify exact received-file sizes before installation or execution; one app transfer was truncated/corrupted.
 - **Radio and television have worked** in the original interface.
 - **Two cameras**: a normal camera and an additional top-facing camera described by the owner as a “spy camera”; both are low-resolution.
 - **Four-SIM design**; exact modem/chipset and whether all slots operate simultaneously have not been measured.
 - Plugging its USB cable into an Arch Linux host has **not yet produced a usable mounted device**, including the microSD card. We must first determine whether USB enumerates at all.
-- The Java runtime version, MIDP/CLDC support, screen dimensions, RAM, firmware version, SoC and native OS are **NOT YET VERIFIED**.
+- **Mero Hello runs:** the runtime reports `CLDC1.1`, `MIDP-2.0`, platform `j2me`, locale `zh-CN`, and a Java heap total of 2,486,656 bytes in one measurement. Screen dimensions, physical RAM, firmware, SoC and native OS remain unknown.
 
 **Do not infer Android, Linux, a command shell, MediaTek chip identifiers, or any supported Java optional API from the Java menu alone.** A classic Java ME (J2ME) implementation on a proprietary feature-phone OS is plausible, but currently a hypothesis.
 
@@ -57,11 +57,15 @@ The first app should be a short, offline **Mero Hello** with screen size, heap n
 - [docs/JAVA-ME.md](docs/JAVA-ME.md) — Java ME primer and build/installation plan.
 - [docs/PLATFORM-NOTES.md](docs/PLATFORM-NOTES.md) — how to reason about OS, USB and “shell” access.
 - [docs/AGENT-HANDOFF.md](docs/AGENT-HANDOFF.md) — pair-coding instructions and milestones.
-- [src/MeroHello.java](src/MeroHello.java) — minimal **uncompiled** MIDlet seed; not yet tested on the phone.
+- [src/MeroHello.java](src/MeroHello.java) — minimal MIDlet probe; compiled, preverified and launched on the handset.
+- [scripts/build.py](scripts/build.py) — produces `build/MeroHello.jar` and its matching JAD using a local Java runtime.
+- [scripts/send-bluetooth.py](scripts/send-bluetooth.py) — sends files to a paired phone using BlueZ OBEX.
+- [scripts/verify-bluetooth.py](scripts/verify-bluetooth.py) — checks exact phone-saved sizes and compares complete file readbacks with the originals.
+- [docs/BLUETOOTH-LINK.md](docs/BLUETOOTH-LINK.md) — Mero Link probe and saved-file verification; Java cannot load the JSR-82 LocalDevice class on this handset.
 
 ## Current state
 
-**RECON-001 open.** No USB IDs, OS identification, successful Java install, binary build or native shell have been confirmed for this phone. The source is exploratory until tested on hardware.
+**First MIDlet milestone achieved.** Bluetooth delivery, Java installation and Mero Hello execution succeeded. The build targets CLDC 1.0 / MIDP 1.0; the phone reports CLDC 1.1 / MIDP 2.0. USB detection, native OS, display/input measurements and optional Java APIs remain open. See the hardware session log for results and the required received-file size check.
 
 ## References
 

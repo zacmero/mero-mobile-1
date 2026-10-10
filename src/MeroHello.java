@@ -1,5 +1,5 @@
 // Educational Java ME / MIDP example.
-// UNTESTED: build only after identifying the phone's Java platform.
+// Targets CLDC 1.0 / MIDP 1.0; handset compatibility remains untested.
 // No Java SE features or optional JSR APIs required.
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.Command;
@@ -28,7 +28,9 @@ public final class MeroHello extends MIDlet implements CommandListener {
     }
 
     private void refresh() {
-        screen.deleteAll();
+        while (screen.size() > 0) {
+            screen.delete(0);
+        }
         screen.append("Mero Mobile #1\n");
         screen.append("Java ME field probe\n\n");
         appendProperty("Config", "microedition.configuration");

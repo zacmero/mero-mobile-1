@@ -5,24 +5,27 @@ You are helping with **mero-mobile-1**, a playful hardware archaeology and Java 
 
 ## Facts already confirmed by owner
 - Java menu with **Application manager**, **Local install**, **Download** and SIM-related connection settings.
-- Wi-Fi connection was successful; Bluetooth exists.
+- Wi-Fi and phone-browser internet access work. Bluetooth pairing and file transfer to microSD succeeded.
 - Working radio and television functions in stock UI.
 - Two low-resolution cameras (main + top-facing).
 - Four-SIM form factor.
 - Connecting USB has **not yielded a mounted phone/card** on Linux. USB enumeration itself has *not* been established.
-- Exact OS, SoC, RAM, storage map, Java ME profile, Java APIs and native shell **are all unknown**.
+- Mero Hello installed and launched. Runtime reports configuration `CLDC1.1`, profile `MIDP-2.0`, platform `j2me`, locale `zh-CN`; heap free 1,846,308 bytes and total 2,486,656 bytes in one observation.
+- Exact OS, SoC, physical RAM, storage map, optional Java APIs and native shell remain unknown. Java heap values are not physical RAM measurements.
 
 ## Instructions
 1. Begin with docs/RECON-001.md and extend docs/HARDWARE.md using only measured/owner-observed facts.
 2. Distinguish physical USB detection, interface enumeration, driver binding and mounted filesystems.
 3. Investigate phone Java Local install and microSD reader route; Bluetooth file transfer is a fallback **only if supported**.
-4. Work toward the smallest portable MIDlet. src/MeroHello.java is an **untested starter**, not proof of a working compiler/toolchain.
+4. Mero Hello builds with `scripts/build.py` and has run on the handset. Keep subsequent probes small; do not infer optional APIs from successful installation.
 5. Confirm CLDC/MIDP/packaging before wiring up an Arch build. Java ME often requires old bytecode and preverification.
 6. Give micro-lessons: MIDlet lifecycle, events/commands, constrained heap, JAR/JAD, Java GCF, optional JSRs.
 7. Treat a native OS console as **a separate hypothesis**. Java support does not imply Linux, Android or WinCE, nor does a modem serial port imply a shell.
 8. Preserve original functionality. No factory reset, reflashing or hardware modifications during initial reconnaissance.
 9. Repo is public: redact IMEI, full MAC addresses when unnecessary, contacts, passwords, SIM data and personal files.
 10. Prefer one small documented experiment at a time; finish with observed result, explanation and next step.
+11. **Owner requirement: verify the received file's exact byte size against the source before every installation or execution.** A first app transfer was truncated/corrupted despite host-side completion reports. Bluetooth or HTTP success is not evidence of an intact saved file. Rounded KB values are insufficient; if exact size cannot be checked, keep installation/execution pending. A matching size detects truncation but does not establish byte-for-byte integrity; compare a checksum too when feasible.
+12. OBEX FTP readback verification works: `scripts/verify-bluetooth.py PHONE_ADDRESS --folder Bt LOCAL_FILES`. Use it after every artifact delivery. Mero Link was delivered and verified (5,392-byte JAR, 302-byte JAD), then launched through JAD and JAR. Both reported Bluetooth unavailable/ClassNotFoundException for the attempted `javax.bluetooth.LocalDevice`. No Java RFCOMM listener started; native OBEX still works. `Key: 0` is the app's initial keypad value. See `docs/BLUETOOTH-LINK.md`; next live-link experiment is Java HTTP over Wi-Fi.
 
 ## First success criteria
 - OS/firmware evidence and actual USB behavior captured (even if no device detected).
@@ -31,6 +34,9 @@ You are helping with **mero-mobile-1**, a playful hardware archaeology and Java 
 - An offline Mero Hello MIDlet launches, or an exact reproducible blocker is documented.
 
 ## Next experiments
+- Owner reaffirmed that identifying the native OS and investigating genuine shell access are main goals, alongside making the phone useful to this computer. Treat Java diagnostics as an evidence-gathering route, not a promise of native access.
+- Next live communication route: Java HTTP over the LAN, after confirming Java's Wi-Fi routing. Probe optional filesystem APIs separately. Standard Java ME file access does not establish control of USB enumeration or native OS access.
+- Native Bluetooth Serial Port `sprd_com3` (RFCOMM channel 3) remains a distinct candidate for protocol identification. Do not call it a shell or send guessed vendor/service commands without identifying the protocol.
 - Display and input measurement, heap usage, optional APIs.
 - LAN text fetch over Java if networking permissions/API permit it.
 - Media, Bluetooth and file storage only where the runtime genuinely supports them.
