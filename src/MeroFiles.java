@@ -3,6 +3,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import javax.microedition.io.Connector;
+import javax.microedition.io.CommConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 import javax.microedition.lcdui.Command;
@@ -26,10 +27,11 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     private String commandStatus = "not checked";
     private String inboxStatus = "not checked";
     private String capabilities = "";
+    private String serialReport = "serial_status=not tested\n";
 
     protected void startApp() {
         if (roots == null) {
-            roots = new List("MERO FILES v0.6 - storage", List.IMPLICIT);
+            roots = new List("MERO FILES v0.7 - storage", List.IMPLICIT);
             roots.addCommand(exit);
             roots.setCommandListener(this);
             try {
@@ -51,7 +53,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private void show(String message) {
-        status = new Form("MERO FILES v0.6");
+        status = new Form("MERO FILES v0.7");
         status.append(message);
         status.addCommand(exit);
         status.setCommandListener(this);
@@ -81,10 +83,14 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
                     String id = field(message, "id");
                     String command = field(message, "command");
                     if (id.length() > 0 && id.length() <= 64 && !id.equals(ack)
-                            && (command.equals("PING") || command.equals("INFO"))) {
+                            && (command.equals("PING") || command.equals("INFO") || command.equals("SERIAL"))) {
                         commandStatus = "accepted " + command;
                         ack = id;
-                        result = command.equals("PING") ? "PONG" : "INFO OK";
+                        if (command.equals("SERIAL")) {
+                            stage = "probe Java serial";
+                            serialReport = probeSerial();
+                            result = "SERIAL DONE";
+                        } else result = command.equals("PING") ? "PONG" : "INFO OK";
                         stage = "write response";
                         writeResponse();
                         show("Mailbox ready\n" + directory + "\n" + command + ": " + result);
@@ -146,8 +152,69 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             + "\nheap_total=" + vm.totalMemory() + "\ncolors=" + Display.getDisplay(this).numColors()
             + "\nfileconnection_version=" + property("microedition.io.file.FileConnection.version")
             + "\nmedia_version=" + property("microedition.media.version")
-            + "\napp_version=0.6\nphone_time_ms=" + System.currentTimeMillis()
-            + "\n" + capabilities + "end=1\n";
+            + "\napp_version=0.7\nphone_time_ms=" + System.currentTimeMillis()
+            + "\n" + capabilities + serialReport + "end=1\n";
+    }
+
+    private String probeSerial() throws Exception {
+        SerialProbe probe = new SerialProbe();
+        Thread worker = new Thread(probe);
+        worker.start();
+        long deadline = System.currentTimeMillis() + 10000;
+        while (!probe.finished && !stopped && System.currentTimeMillis() < deadline) Thread.sleep(100);
+        if (!probe.finished) {
+            probe.cancelled = true;
+            try { if (probe.connection != null) probe.connection.close(); } catch (Exception error) { }
+            return "serial_status=timeout\nserial_stage=" + probe.stage + "\n";
+        }
+        return probe.report;
+    }
+
+    private final class SerialProbe implements Runnable {
+        volatile boolean finished;
+        volatile boolean cancelled;
+        volatile CommConnection connection;
+        volatile String stage = "open comm:0";
+        String report;
+        public void run() {
+            InputStream input = null;
+            OutputStream output = null;
+            StringBuffer data = new StringBuffer("serial_port=0\n");
+            try {
+                connection = (CommConnection) Connector.open("comm:0;blocking=off");
+                if (cancelled) return;
+                data.append("serial_baudrate=").append(connection.getBaudRate()).append('\n');
+                stage = "open serial streams";
+                input = connection.openInputStream();
+                output = connection.openOutputStream();
+                String[] commands = { "", "AT", "ATI", "AT+CGMI", "AT+CGMM", "AT+CGMR" };
+                for (int i = 0; i < commands.length && !cancelled; i++) {
+                    stage = i == 0 ? "passive serial read" : commands[i];
+                    if (i > 0) { output.write((commands[i] + "\r").getBytes("UTF-8")); output.flush(); }
+                    StringBuffer hex = new StringBuffer();
+                    String digits = "0123456789abcdef";
+                    long deadline = System.currentTimeMillis() + 700;
+                    while (!cancelled && System.currentTimeMillis() < deadline && hex.length() < 1024) {
+                        if (input.available() > 0) {
+                            int c = input.read();
+                            if (c < 0) break;
+                            hex.append(digits.charAt((c & 255) >> 4)).append(digits.charAt(c & 15));
+                        } else Thread.sleep(50);
+                    }
+                    data.append("serial_reply_").append(i).append("_hex=").append(hex).append('\n');
+                }
+                data.append("serial_status=connected\n");
+            } catch (Exception error) {
+                data.append("serial_status=error\nserial_stage=").append(stage).append('\n');
+                data.append("serial_error=").append(error.toString().replace('\n', ' ').replace('\r', ' ')).append('\n');
+            } finally {
+                try { if (input != null) input.close(); } catch (Exception error) { }
+                try { if (output != null) output.close(); } catch (Exception error) { }
+                try { if (connection != null) connection.close(); } catch (Exception error) { }
+                report = data.toString();
+                finished = true;
+            }
+        }
     }
 
     private String collectCapabilities() {

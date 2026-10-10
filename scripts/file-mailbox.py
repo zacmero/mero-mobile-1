@@ -33,15 +33,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('address', help='Paired phone Bluetooth address')
     parser.add_argument('--folder', default='MeroMailbox', help='Mailbox path relative to OBEX root')
-    parser.add_argument('--command', choices=('PING', 'INFO'), help='Omit to read startup diagnostics')
+    parser.add_argument('--command', choices=('PING', 'INFO', 'SERIAL'), help='Omit to read startup diagnostics')
     parser.add_argument('--transport', choices=('opp', 'ftp'), default='opp', help='Command delivery; OPP works on this phone')
     parser.add_argument('--inbox', default='Ebook', help='OBEX folder where native OPP saves command.txt')
     parser.add_argument('--ftp-channel', type=int, choices=range(1, 31), help='Measured FTP RFCOMM channel')
     parser.add_argument('--opp-channel', type=int, choices=range(1, 31), help='Measured OPP RFCOMM channel')
     parser.add_argument('--timeout', type=int, default=60)
+    parser.add_argument('--permission-wait', type=int, default=0, help='Seconds of Bluetooth silence after command reception')
     args = parser.parse_args()
     if args.timeout < 1 or args.timeout > 300:
         parser.error('Timeout must be 1..300 seconds')
+    if not 0 <= args.permission_wait <= 120:
+        parser.error('Permission wait must be 0..120 seconds')
     if not args.folder or any(part in ('.', '..') for part in args.folder.split('/')):
         parser.error('Use a mailbox folder path without dot components')
     command_id = str(time.time_ns()) if args.command else None
@@ -61,6 +64,9 @@ def main():
             push_channel = ['--channel', str(args.opp_channel)] if args.opp_channel is not None else []
             read_channel = ['--channel', str(args.ftp_channel)] if args.ftp_channel is not None else []
             subprocess.run([sys.executable, str(scripts / 'send-bluetooth.py'), args.address, str(source)] + push_channel, check=True)
+            if args.permission_wait:
+                print('Waiting for phone permission prompts before Bluetooth readback', flush=True)
+                time.sleep(args.permission_wait)
             subprocess.run([sys.executable, str(scripts / 'verify-bluetooth.py'), args.address,
                             '--folder', args.inbox, str(source)] + read_channel, check=True)
     DBusGMainLoop(set_as_default=True)
@@ -154,6 +160,8 @@ def main():
                     if command_id is None or fields['ack'] == command_id:
                         if args.command == 'PING' and fields['result'] != 'PONG':
                             raise ValueError('PING did not return PONG')
+                        if args.command == 'SERIAL' and fields['result'] != 'SERIAL DONE':
+                            raise ValueError('SERIAL did not complete')
                         if args.command == 'INFO' and fields['result'] != 'INFO OK':
                             raise ValueError('INFO did not return INFO OK')
                         logs = Path(__file__).resolve().parent.parent / 'logs'

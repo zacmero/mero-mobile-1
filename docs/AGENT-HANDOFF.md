@@ -148,3 +148,16 @@ Host passively connected native RFCOMM channel 3; no unsolicited data in
 eight seconds, zero application bytes sent. No console/shell/protocol identified.
 Do not send guessed native service commands; Java comm port 0 remains an
 unproven candidate, not a demonstrated connection. v0.6 is the current app.
+
+## Current native-access experiments
+
+Owner authorized steps 1/2 serial identification followed by continuous USB
+cold-boot monitoring, with board inspection deferred. See NATIVE-ACCESS.md.
+Native SPP channel 3 refused current connections; no AT query delivered.
+Verified v0.7 (8,500-byte JAR, 379-byte JAD) ran SERIAL; matching ack returned
+SERIAL DONE, serial_status=timeout, serial_stage=open comm:0. No serial port
+opened. Relaunch before repeating to avoid accumulating a blocked native open.
+USB watcher is active as exec session 18312 and records logs/usb-events.jsonl
+continuously. Power-off/USB-reconnect showed charging and no USB events.
+Owner was asked to try holding centre/OK on reconnect; await that result.
+No board work, firmware write, or loader execution has been performed.

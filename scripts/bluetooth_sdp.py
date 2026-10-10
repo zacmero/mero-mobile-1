@@ -38,7 +38,11 @@ def element(data, offset=0):
 
 
 def find_channel(address, service=LINK_UUID):
-    query = bytes.fromhex('35111c') + uuid.UUID(service).bytes
+    service_bytes = uuid.UUID(service).bytes
+    if service_bytes[:2] == b'\x00\x00' and service_bytes[4:] == bytes.fromhex('00001000800000805f9b34fb'):
+        query = bytes.fromhex('350319') + service_bytes[2:4]
+    else:
+        query = bytes.fromhex('35111c') + service_bytes
     attributes = bytearray()
     continuation = b'\x00'
     with socket.socket(socket.AF_BLUETOOTH, socket.SOCK_SEQPACKET, socket.BTPROTO_L2CAP) as sock:
@@ -76,4 +80,4 @@ def find_channel(address, service=LINK_UUID):
                         channel = protocol[1][1]
                         if protocol[1][0] == 1 and 1 <= channel <= 30:
                             return channel
-    raise RuntimeError('MeroLink service not advertised; launch the phone app first or check its error screen')
+    raise RuntimeError('Requested service ' + service + ' has no advertised RFCOMM channel')

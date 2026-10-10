@@ -69,6 +69,8 @@ The first app should be a short, offline **Mero Hello** with screen size, heap n
 
 - [docs/CAPABILITY-INVENTORY.md](docs/CAPABILITY-INVENTORY.md) — complete automated v0.6 inventory, storage capacity, Java serial/media clues and passive native serial result.
 
+- [docs/NATIVE-ACCESS.md](docs/NATIVE-ACCESS.md) — actual native/Java serial attempts and continuous USB boot discovery.
+
 ## Current state
 
 **First MIDlet milestone achieved.** Bluetooth delivery, Java installation and Mero Hello execution succeeded. The build targets CLDC 1.0 / MIDP 1.0; the phone reports CLDC 1.1 / MIDP 2.0. Canvas dimensions and optional API class presence are measured. USB detection, native OS, and actual optional API operation remain open. A native Bluetooth / Java file mailbox now completed a verified PING/PONG round trip. Incoming-file acceptance remains manual; diagnostics are retrieved automatically. See the hardware session log for results and the required received-file size check.
