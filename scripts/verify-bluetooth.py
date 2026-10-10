@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('address', help='Paired phone Bluetooth address')
 parser.add_argument('--folder', default='Bt', help='Phone folder path relative to OBEX root')
 parser.add_argument('files', nargs='+', type=Path, help='Local originals to compare')
+parser.add_argument('--channel', type=int, choices=range(1, 31), help='Known RFCOMM channel; bypass SDP discovery')
 args = parser.parse_args()
 for file in args.files:
     if not file.is_file():
@@ -22,7 +23,10 @@ bus = dbus.SessionBus()
 client = dbus.Interface(bus.get_object('org.bluez.obex', '/org/bluez/obex'), 'org.bluez.obex.Client1')
 session = None
 try:
-    session = client.CreateSession(args.address, {'Target': dbus.String('ftp')}, timeout=35)
+    options = {'Target': dbus.String('ftp')}
+    if args.channel is not None:
+        options['Channel'] = dbus.Byte(args.channel)
+    session = client.CreateSession(args.address, options, timeout=35)
     ftp = dbus.Interface(bus.get_object('org.bluez.obex', session), 'org.bluez.obex.FileTransfer1')
     for folder in args.folder.split('/'):
         if folder:

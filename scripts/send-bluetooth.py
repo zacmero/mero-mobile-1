@@ -10,6 +10,7 @@ from gi.repository import GLib
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('address', help='Paired phone Bluetooth address')
 parser.add_argument('files', nargs='+', type=Path)
+parser.add_argument('--channel', type=int, choices=range(1, 31), help='Known RFCOMM channel; bypass SDP discovery')
 args = parser.parse_args()
 for file in args.files:
     if not file.is_file():
@@ -19,7 +20,10 @@ bus = dbus.SessionBus()
 client = dbus.Interface(bus.get_object('org.bluez.obex', '/org/bluez/obex'), 'org.bluez.obex.Client1')
 session = None
 try:
-    session = client.CreateSession(args.address, {'Target': dbus.String('opp')}, timeout=35)
+    options = {'Target': dbus.String('opp')}
+    if args.channel is not None:
+        options['Channel'] = dbus.Byte(args.channel)
+    session = client.CreateSession(args.address, options, timeout=35)
     push = dbus.Interface(bus.get_object('org.bluez.obex', session), 'org.bluez.obex.ObjectPush1')
     for file in args.files:
         expected_size = file.stat().st_size

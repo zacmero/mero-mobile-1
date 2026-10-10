@@ -23,10 +23,11 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     private String ack = "none";
     private String result = "startup";
     private int sequence;
+    private String commandStatus = "not checked";
 
     protected void startApp() {
         if (roots == null) {
-            roots = new List("MERO FILES v0.2 - storage", List.IMPLICIT);
+            roots = new List("MERO FILES v0.3 - storage", List.IMPLICIT);
             roots.addCommand(exit);
             roots.setCommandListener(this);
             try {
@@ -48,7 +49,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private void show(String message) {
-        status = new Form("MERO FILES v0.2");
+        status = new Form("MERO FILES v0.3");
         status.append(message);
         status.addCommand(exit);
         status.setCommandListener(this);
@@ -68,19 +69,27 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             show("Mailbox ready\n" + directory + "\nReading Ebook/command.txt");
             while (!stopped) {
                 stage = "read command";
+                String previousStatus = commandStatus;
                 String message = readCommand();
+                commandStatus = message == null ? "file missing or oversized" : "read " + message.length() + " chars; protocol=" + field(message, "protocol") + "; end=" + message.endsWith("end=1\n");
                 if (message != null && field(message, "protocol").equals("mero-files/1")
                         && message.endsWith("end=1\n")) {
                     String id = field(message, "id");
                     String command = field(message, "command");
                     if (id.length() > 0 && id.length() <= 64 && !id.equals(ack)
                             && (command.equals("PING") || command.equals("INFO"))) {
+                        commandStatus = "accepted " + command;
                         ack = id;
                         result = command.equals("PING") ? "PONG" : "INFO OK";
                         stage = "write response";
                         writeResponse();
                         show("Mailbox ready\n" + directory + "\n" + command + ": " + result);
                     }
+                }
+                if (!commandStatus.equals(previousStatus)) {
+                    stage = "write command status";
+                    writeResponse();
+                    show("Mailbox ready\n" + directory + "\n" + commandStatus);
                 }
                 Thread.sleep(2000);
             }
@@ -120,7 +129,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
         Runtime vm = Runtime.getRuntime();
         sequence++;
         return "protocol=mero-files/1\nseq=" + sequence + "\nack=" + ack + "\nresult=" + result
-            + "\nmailbox=" + directory + "\nconfig=" + property("microedition.configuration")
+            + "\ncommand_status=" + commandStatus + "\nmailbox=" + directory + "\nconfig=" + property("microedition.configuration")
             + "\nprofiles=" + property("microedition.profiles") + "\nplatform=" + property("microedition.platform")
             + "\nlocale=" + property("microedition.locale") + "\nheap_free=" + vm.freeMemory()
             + "\nheap_total=" + vm.totalMemory() + "\ncolors=" + Display.getDisplay(this).numColors()

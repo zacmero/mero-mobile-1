@@ -64,3 +64,12 @@ v0.2 now reads Ebook/command.txt, writes MeroMailbox/response.txt. The updated
 install v0.2 and select E:/; matching PONG is pending. file-mailbox.py defaults
 to OPP command delivery followed by readback verification and response polling.
 Incoming-file acceptance remains manual. No unattended or low-latency claim.
+
+## Latest mailbox delivery
+
+v0.2 launched but only startup response was retrieved; no error on phone, no
+command acknowledgement. Ebook/command.txt spelling/content verified again.
+v0.3 adds command_status diagnostics and was fully readback-verified in Bt
+(4,422-byte JAR, 342-byte JAD). Owner was asked to install/select E:/.
+Use measured FTP channel 5 / OPP channel 1 to bypass intermittent SDP failures:
+sender/verifier --channel; mailbox --ftp-channel / --opp-channel.

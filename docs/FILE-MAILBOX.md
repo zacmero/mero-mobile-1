@@ -136,3 +136,35 @@ were transferred and fully verified before requesting installation:
 The v0.2 launch and matching PONG readback remain pending. Ordinary reconnects
 between separate OPP/FTP sessions are expected. Reception prompts still require
 the owner; fully unattended command delivery is not established.
+
+## v0.2 observed result and v0.3 diagnostic update
+
+The owner launched v0.2, selected E:/, and reported Mailbox ready / Reading
+Ebook/command.txt, with no error. A fresh response was retrieved: seq=1,
+ack=none, result=startup, heap_free=1792884; other runtime fields matched the
+previous startup snapshot. A new OPP PING attempt failed. The original command
+remained in Ebook/command.txt at 64 bytes and passed full readback comparison
+again. Folder/filename spelling was checked through OBEX, printing only the
+app mailbox/inbox entries; no personal file contents were inspected.
+
+Service discovery intermittently returned Unable to find service record.
+Explicit use of the previously measured FTP channel 5 allowed successful
+command and artifact readbacks. Optional --channel is now available in the
+sender/verifier; the mailbox client accepts --ftp-channel and --opp-channel.
+These are device-specific measured channels, not universal defaults.
+
+v0.3 adds command_status to the response and phone UI. It reports whether Java
+sees a command file and whether its protocol/end marker were recognized.
+This avoids interpreting Mailbox ready as successful command reception.
+The update was transferred through measured OPP channel 1 and verified through
+FTP channel 5 before installation was requested:
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| MeroFiles.jar | 4,422 | dfd88126e4c490b70fc901c9092693a553ff287db66ab65f96ce31978dea9fdc |
+| MeroFiles.jad | 342 | 103455e2e68a330522c9e6c026a76a8e7fde47e676fa21bccea79db735c9a421 |
+
+Launch and command_status readback remain pending. PING/PONG is unconfirmed.
+Example using this handset's measured service channels:
+
+    rtk proxy python scripts/file-mailbox.py PHONE_ADDRESS --ftp-channel 5 --opp-channel 1 --command PING
