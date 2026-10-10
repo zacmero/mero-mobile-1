@@ -128,3 +128,11 @@ Do not commit raw contacts, messages, network passwords, IMEI, serials, or devic
 - `Key: 0` is the app's initial last-key value, not part of the exception or a Bluetooth error code.
 - Native `sprd_com3` remains an untested separate interface; it does not establish a path into the Java app.
 - Next practical communication experiment: Java HTTP over Wi-Fi to a local computer server. Phone-browser internet access does not yet prove Java's Wi-Fi routing works.
+
+### HTTP diagnostic delivery and networking investigation
+- Built/delivered Mero HTTP v0.1 (6,061-byte JAR, 290-byte JAD), verified both saved files by full OBEX FTP readback, then owner launched it. It reported `java.io.IOException`; no valid Java diagnostic snapshot reached the server.
+- Computer firewalld was active on the LAN interface. A one-hour runtime rule permits TCP port 8765 only from the local IPv4 LAN subnet.
+- Owner reconnected phone Wi-Fi and successfully downloaded the server readiness response in the built-in browser. This confirms browser reachability, not Java's network routing. The original readiness response was text/plain and the phone offered it as a download; the server now sends a simple HTML page at `/`.
+- Original server logs stored only validated diagnostic snapshots and omitted browser/rejected requests. Fixed logging to record redacted HTTP request metadata separately.
+- Mero HTTP v0.2 uses GET by default, permits switching to POST and reports the failure stage. Delivered and read back the update: JAR 6,846 bytes, JAD 290 bytes; both full contents matched the originals. Exact hashes are in `docs/HTTP-LINK.md`.
+- v0.2 handset observation and Java command round trip remain pending. Key code `-6` reported by the owner is the app's keypad measurement, separate from the network error.

@@ -62,6 +62,7 @@ The first app should be a short, offline **Mero Hello** with screen size, heap n
 - [scripts/send-bluetooth.py](scripts/send-bluetooth.py) — sends files to a paired phone using BlueZ OBEX.
 - [scripts/verify-bluetooth.py](scripts/verify-bluetooth.py) — checks exact phone-saved sizes and compares complete file readbacks with the originals.
 - [docs/BLUETOOTH-LINK.md](docs/BLUETOOTH-LINK.md) — Mero Link probe and saved-file verification; Java cannot load the JSR-82 LocalDevice class on this handset.
+- [docs/HTTP-LINK.md](docs/HTTP-LINK.md) — LAN diagnostic server and GET/POST phone probe; browser reachability confirmed, live Java connection pending.
 
 ## Current state
 

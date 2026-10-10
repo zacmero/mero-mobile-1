@@ -2,6 +2,7 @@
 """Build a preverified CLDC 1.0 / MIDP 1.0 probe using a local Java runtime."""
 import argparse
 import hashlib
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -18,7 +19,7 @@ TOOLS = {
 }
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--java', default=shutil.which('java'), help='Java executable (8 or later)')
-parser.add_argument('--app', choices=('hello', 'link'), default='hello')
+parser.add_argument('--app', choices=('hello', 'link', 'http'), default='hello')
 args = parser.parse_args()
 if not args.java:
     parser.error('Java runtime missing; provide --java /path/to/bin/java')
@@ -37,7 +38,7 @@ for name, (url, digest) in TOOLS.items():
         raise RuntimeError('Cached checksum mismatch: ' + name)
 
 build = ROOT / 'build'
-app = 'MeroHello' if args.app == 'hello' else 'MeroLink'
+app = {'hello': 'MeroHello', 'link': 'MeroLink', 'http': 'MeroHTTP'}[args.app]
 classes = build / (app + '-classes')
 if classes.exists():
     shutil.rmtree(classes)
@@ -47,15 +48,23 @@ sources = [str(ROOT / ('src/' + app + '.java'))]
 if args.app == 'link':
     apis.append(str(CACHE / 'bluecove.jar'))
     sources.append(str(ROOT / 'src/BluetoothLink.java'))
+if args.app == 'http':
+    settings = json.loads((build / 'http-settings.json').read_text())
+    generated = build / 'HTTPSettings.java'
+    generated.write_text('final class HTTPSettings { static final String URL = ' + json.dumps(settings['url']) + '; }\n')
+    sources.append(str(generated))
 subprocess.run([args.java, '-jar', str(CACHE / 'ecj.jar'), '-source', '1.3', '-target', '1.1',
                 '-bootclasspath', ':'.join(apis), '-d', str(classes)] + sources, check=True)
-name = 'Mero Hello' if args.app == 'hello' else 'Mero Link'
+name = {'hello': 'Mero Hello', 'link': 'Mero Link', 'http': 'Mero HTTP'}[args.app]
 profile = 'MIDP-1.0' if args.app == 'hello' else 'MIDP-2.0'
-manifest = ('Manifest-Version: 1.0\r\nMIDlet-Name: ' + name + '\r\nMIDlet-Version: 0.1.0\r\n'
+version = '0.2.0' if args.app == 'http' else '0.1.0'
+manifest = ('Manifest-Version: 1.0\r\nMIDlet-Name: ' + name + '\r\nMIDlet-Version: ' + version + '\r\n'
             'MIDlet-Vendor: Mero Lab\r\nMIDlet-1: ' + name + ', , ' + app + '\r\n'
             'MicroEdition-Configuration: CLDC-1.0\r\nMicroEdition-Profile: ' + profile + '\r\n')
 if args.app == 'link':
     manifest += 'MIDlet-Permissions-Opt: javax.microedition.io.Connector.bluetooth.server\r\n'
+if args.app == 'http':
+    manifest += 'MIDlet-Permissions-Opt: javax.microedition.io.Connector.http\r\n'
 unverified = build / (app + '-unverified.jar')
 output = build / (app + '.jar')
 with zipfile.ZipFile(unverified, 'w', zipfile.ZIP_DEFLATED) as jar:
