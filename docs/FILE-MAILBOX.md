@@ -274,3 +274,25 @@ file. Finish Java permission prompts before Bluetooth retrieval; retry transient
 connection failures without assuming new files were delivered. INFO can request
 fresh automated runtime diagnostics using the same route. Native OS, shell,
 USB support, and unattended reception remain separate open questions.
+
+## Fresh INFO command confirmed
+
+With Mero Files v0.5 running, a fresh INFO command was delivered through native
+OPP, verified by exact-size and full-content FTP readback, and acknowledged
+with matching ID and result=INFO OK. The 64-byte command readback SHA-256 was
+04efe20e95ad31b883fbfe3d360dd63d30dcd3a06fa6daa255be6b49b693dba1.
+
+The retrieved snapshot reported seq=9, command_status=accepted INFO,
+inbox_status=command exists; bytes=64; url=file:///E:/Ebook/command.txt,
+heap_free=1270820 and heap_total=2486656. Runtime/configuration/profile/locale,
+mailbox URL, color count and API version properties matched the confirmed
+PONG snapshot. The final marker was end=1. This was a fresh command round trip,
+not merely rereading the earlier PONG.
+
+Transient OPP/FTP connection failures occurred before this successful run.
+The verifier and mailbox reader now retry FTP session creation up to three
+times with two-second gaps. Transfer-content mismatches still fail verification.
+The mailbox client retains the latest requested command privately in ignored
+logs/file-mailbox-command.txt (mode 0600), allowing exact comparison if a
+readback connection fails. It does not silently resend commands on connection
+failure. Native reception still requires the owner to accept each file.

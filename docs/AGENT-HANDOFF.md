@@ -112,3 +112,12 @@ snapshot in FILE-MAILBOX.md. Incoming-file acceptance remains manual. Java file
 read/write and the actual two-way command round trip are now proven. Preserve
 v0.5: 4,628-byte JAR, 342-byte JAD; verify every new delivery before execution.
 No native shell/OS or unattended reception has been established.
+
+## Fresh INFO achieved
+
+A new 64-byte INFO command passed full readback and returned matching ack /
+INFO OK, seq=9, heap_free=1270820. This confirms fresh command processing
+beyond the first PONG. Host scripts now retry FTP session creation three times
+and retain ignored/private logs/file-mailbox-command.txt for failed-readback
+recovery. Owner acceptance is still needed per incoming file; no unattended
+operation or native shell claim.

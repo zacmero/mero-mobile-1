@@ -47,6 +47,12 @@ def main():
     command_id = str(time.time_ns()) if args.command else None
     command = (('protocol=mero-files/1\nid=' + command_id + '\ncommand='
                 + args.command + '\nend=1\n').encode('utf-8') if args.command else None)
+    if command is not None:
+        logs = Path(__file__).resolve().parent.parent / 'logs'
+        logs.mkdir(exist_ok=True)
+        pending = logs / 'file-mailbox-command.txt'
+        pending.write_bytes(command)
+        pending.chmod(0o600)
     if args.command and args.transport == 'opp':
         scripts = Path(__file__).resolve().parent
         with tempfile.TemporaryDirectory(prefix='mero-command-') as directory:
@@ -105,7 +111,14 @@ def main():
         options = {'Target': dbus.String('ftp')}
         if args.ftp_channel is not None:
             options['Channel'] = dbus.Byte(args.ftp_channel)
-        session = client.CreateSession(args.address, options, timeout=35)
+        for attempt in range(3):
+            try:
+                session = client.CreateSession(args.address, options, timeout=35)
+                break
+            except dbus.DBusException:
+                if attempt == 2:
+                    raise
+                time.sleep(2)
         ftp = dbus.Interface(bus.get_object('org.bluez.obex', session), 'org.bluez.obex.FileTransfer1')
         for part in args.folder.split('/'):
             if part:

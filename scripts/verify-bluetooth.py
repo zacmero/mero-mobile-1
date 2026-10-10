@@ -5,6 +5,7 @@ import hashlib
 from pathlib import Path
 import sys
 import tempfile
+import time
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
@@ -26,7 +27,14 @@ try:
     options = {'Target': dbus.String('ftp')}
     if args.channel is not None:
         options['Channel'] = dbus.Byte(args.channel)
-    session = client.CreateSession(args.address, options, timeout=35)
+    for attempt in range(3):
+        try:
+            session = client.CreateSession(args.address, options, timeout=35)
+            break
+        except dbus.DBusException:
+            if attempt == 2:
+                raise
+            time.sleep(2)
     ftp = dbus.Interface(bus.get_object('org.bluez.obex', session), 'org.bluez.obex.FileTransfer1')
     for folder in args.folder.split('/'):
         if folder:
