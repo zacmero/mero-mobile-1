@@ -349,3 +349,39 @@ profile clues together with Matomo's published classification rule. The exact
 OS kernel, chipset and firmware build remain unconfirmed. A shell has not been
 identified. The absence of an exposed native installer weakens the proposed
 MRP-launcher route; do not assume MRP support or package compatibility.
+
+## Software versus physical access: verified tool scope
+
+The owner supplied an overview linking Powerpack, Mocor, SC6531/SC6600 and
+Windows sprd_com3 drivers. Treat those exact-model/chip/USB claims as supplied
+hypotheses. On this device, sprd_com3 was a Bluetooth SDP Serial Port service
+name, not an enumerated USB device or Windows driver record. Controlled USB
+observations recorded no device events; missing function drivers do not explain
+away that measured absence. The reason for the missing data interface is still
+unknown, including whether the right boot mode or data wiring is available.
+
+The current [spreadtrum_flash documentation](https://github.com/ilyakurdyukov/spreadtrum_flash)
+explicitly lists SC6530/SC6531DA/SC6531E feature-phone support, with USB/libusb or
+Linux USB-serial operation and an observed boot device expected at 1782:4d00.
+This does not establish compatibility with the unconfirmed SC6600-family clue
+in this phone's UA profile. Do not choose a loader from a browser string.
+
+[FPDoom](https://github.com/ilyakurdyukov/fpdoom) demonstrates loading native
+programs into RAM through the downloader on supported devices. This proves a
+software-loading path exists for that supported hardware, not that this phone
+is supported or that a stock shell exists. Native RAM execution could provide
+an opportunity to implement a console without initially replacing firmware.
+The loader still needs correct chipset/memory initialization and a working
+transport; RAM loading must not be confused with an inert read-only query.
+
+The [SD boot instructions](https://github.com/ilyakurdyukov/fpdoom/blob/main/sdboot/README.md)
+require dumping firmware and installing a boot patch first. Dropping a binary
+onto an unmodified SD card is not the documented boot mechanism.
+
+Current conclusion: software-only native access remains possible in principle,
+but no working software route to native execution or firmware readout has been
+identified on this phone. Board photos/chip markings would narrow the target
+without soldering. Connector/data-path identification or a physical UART may
+later be needed if an existing boot transport cannot be exposed. Physical work
+is a candidate next route, not an established necessity. USB monitoring remains
+stopped; no loader, boot patch or firmware write has been performed.

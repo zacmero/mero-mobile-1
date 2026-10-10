@@ -275,3 +275,16 @@ App-bundle searches yielded no reliable exact-firmware match. Strongest current
 OS hypothesis is Mocor-family based on Dorado, Spreadtrum profile and native
 sprd service clues plus Matomo's OS classifier; exact kernel/chipset/build and
 shell availability remain unconfirmed. See NATIVE-ACCESS.md research limits.
+
+## Software/physical feasibility clarification
+
+Owner supplied a broad Powerpack/Spreadtrum overview. Correct interpretation:
+our sprd_com3 is a Bluetooth SDP name; USB never enumerated in the tested
+operations. Upstream tools support specific chips, not an established match to
+this phone's 6600L profile clue. FPDoom proves native RAM loading on supported
+devices; SD boot requires a firmware dump/installed patch first. No stock shell
+or native execution is established here. Chip-marking photos could identify the
+actual target without soldering; connector/UART intervention might be needed
+later. Physical access is not proven mandatory. Keep firmware/loader operations
+pending an actual compatible target and usable transport. USB watcher remains
+stopped. Sources and detailed scope are in NATIVE-ACCESS.md.
