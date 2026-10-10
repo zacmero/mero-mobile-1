@@ -296,3 +296,27 @@ The mailbox client retains the latest requested command privately in ignored
 logs/file-mailbox-command.txt (mode 0600), allowing exact comparison if a
 readback connection fails. It does not silently resend commands on connection
 failure. Native reception still requires the owner to accept each file.
+
+## v0.6 capability inventory build (delivery pending)
+
+v0.6 extends snapshots with app version, phone clock milliseconds, encoding and
+serial-port properties, generic vendor/OS properties, multimedia capture and
+encoding properties, optional API class presence, storage roots, and selected
+storage total/available/used byte counts. Queries use a fixed metadata allowlist;
+no contacts, personal file listing, media capture, native commands, or firmware
+writes are performed. Properties are limited to 256 characters with a visible
+truncation marker. Unavailable/denied properties are reported individually.
+
+The inventory is collected once at app startup after choosing storage. Storage
+capacity and capability fields therefore describe that startup observation;
+heap, clock and command acknowledgement are refreshed per response. API class
+presence and advertised capture properties do not prove hardware operation or
+native shell availability. Generic OS properties may be unavailable or identify
+only the runtime. Negative storage counters indicate unsupported/unknown values
+and must not be interpreted as measured capacity.
+
+Compilation succeeded, but two send attempts returned Host is down before file
+delivery. Artifacts are not yet verified on the phone. Owner was asked to enable
+Bluetooth visibility before resending. Keep verified v0.5 available until the
+v0.6 update passes full saved-file verification. Do not poll Bluetooth while the
+owner launches the new app or completes permission prompts.

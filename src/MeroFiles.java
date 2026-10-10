@@ -25,10 +25,11 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     private int sequence;
     private String commandStatus = "not checked";
     private String inboxStatus = "not checked";
+    private String capabilities = "";
 
     protected void startApp() {
         if (roots == null) {
-            roots = new List("MERO FILES v0.5 - storage", List.IMPLICIT);
+            roots = new List("MERO FILES v0.6 - storage", List.IMPLICIT);
             roots.addCommand(exit);
             roots.setCommandListener(this);
             try {
@@ -50,7 +51,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private void show(String message) {
-        status = new Form("MERO FILES v0.5");
+        status = new Form("MERO FILES v0.6");
         status.append(message);
         status.addCommand(exit);
         status.setCommandListener(this);
@@ -65,6 +66,8 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
                 if (!folder.exists()) folder.mkdir();
                 if (!folder.isDirectory()) throw new java.io.IOException("Mailbox is not a directory");
             } finally { folder.close(); }
+            stage = "collect capabilities";
+            capabilities = collectCapabilities();
             stage = "write startup diagnostics";
             writeResponse();
             show("Mailbox ready\n" + directory + "\nReading Ebook/command.txt");
@@ -142,13 +145,54 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             + "\nlocale=" + property("microedition.locale") + "\nheap_free=" + vm.freeMemory()
             + "\nheap_total=" + vm.totalMemory() + "\ncolors=" + Display.getDisplay(this).numColors()
             + "\nfileconnection_version=" + property("microedition.io.file.FileConnection.version")
-            + "\nmedia_version=" + property("microedition.media.version") + "\nend=1\n";
+            + "\nmedia_version=" + property("microedition.media.version")
+            + "\napp_version=0.6\nphone_time_ms=" + System.currentTimeMillis()
+            + "\n" + capabilities + "end=1\n";
+    }
+
+    private String collectCapabilities() {
+        StringBuffer data = new StringBuffer();
+        String[] properties = { "microedition.encoding", "microedition.commports",
+            "java.vendor", "java.version", "os.name", "os.version", "os.arch",
+            "supports.audio.capture", "supports.video.capture", "supports.recording",
+            "audio.encodings", "video.encodings", "video.snapshot.encodings", "streamable.contents",
+            "microedition.pim.version", "microedition.location.version", "microedition.m3g.version",
+            "microedition.amms.version", "microedition.sensor.version", "bluetooth.api.version" };
+        for (int i = 0; i < properties.length; i++)
+            data.append("property.").append(properties[i]).append('=').append(property(properties[i])).append('\n');
+        String[] classes = { "javax.microedition.io.file.FileConnection", "javax.microedition.media.Manager",
+            "javax.microedition.media.control.VideoControl", "javax.microedition.media.control.RecordControl",
+            "javax.bluetooth.LocalDevice", "javax.obex.ClientSession", "javax.microedition.io.CommConnection",
+            "javax.microedition.pim.PIM", "javax.microedition.location.LocationProvider",
+            "javax.microedition.m3g.Graphics3D", "javax.microedition.sensor.SensorManager" };
+        for (int i = 0; i < classes.length; i++) {
+            boolean available;
+            try { Class.forName(classes[i]); available = true; }
+            catch (Throwable error) { available = false; }
+            data.append("class.").append(classes[i]).append('=').append(available).append('\n');
+        }
+        for (int i = 0; i < roots.size(); i++)
+            data.append("storage_root_").append(i).append('=').append(roots.getString(i)).append('\n');
+        try {
+            FileConnection storage = (FileConnection) Connector.open(directory);
+            try {
+                data.append("storage_total_bytes=").append(storage.totalSize()).append('\n');
+                data.append("storage_available_bytes=").append(storage.availableSize()).append('\n');
+                data.append("storage_used_bytes=").append(storage.usedSize()).append('\n');
+            } finally { storage.close(); }
+        } catch (Exception error) {
+            data.append("storage_error=").append(error.toString().replace('\n', ' ').replace('\r', ' ')).append('\n');
+        }
+        return data.toString();
     }
 
     private String property(String name) {
-        String value = System.getProperty(name);
-        if (value == null) return "unavailable";
-        return value.replace('\n', ' ').replace('\r', ' ');
+        try {
+            String value = System.getProperty(name);
+            if (value == null) return "unavailable";
+            if (value.length() > 256) value = value.substring(0, 256) + "...(truncated)";
+            return value.replace('\n', ' ').replace('\r', ' ');
+        } catch (Exception error) { return "denied: " + error.getClass().getName(); }
     }
 
     private String field(String message, String name) {

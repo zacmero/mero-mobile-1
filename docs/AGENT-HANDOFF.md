@@ -121,3 +121,11 @@ beyond the first PONG. Host scripts now retry FTP session creation three times
 and retain ignored/private logs/file-mailbox-command.txt for failed-readback
 recovery. Owner acceptance is still needed per incoming file; no unattended
 operation or native shell claim.
+
+## v0.6 built, not delivered
+
+Owner asked to continue. v0.6 adds a fixed metadata capability/property inventory
+and selected-storage capacity counters, cached at startup; clock and heap are
+fresh per response. Built successfully. Two OPP attempts failed Host is down
+before delivery. Await phone Bluetooth on/visible confirmation, resend and
+fully verify before installation. v0.5 remains the proven working app.
