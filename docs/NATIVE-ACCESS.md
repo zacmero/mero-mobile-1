@@ -96,3 +96,39 @@ selected or executed. See the primary
 The board-covering label reports model N2322. Owner-supplied SN and IMEI are
 preserved exactly in private/DEVICE-LABEL.md and excluded from public Git.
 No chipset inference is made from this model. Board inspection remains deferred.
+
+
+## Subsequent software probes
+
+USB monitoring was stopped at the owner's request. A further normal boot while
+connected produced no recorded USB events. No USB monitor is currently running.
+
+After refreshing Bluetooth inquiry, native RFCOMM channel 3 accepted a connection.
+The host sent AT, ATI, AT+CGMI, AT+CGMM and AT+CGMR, each terminated by carriage
+return, and received zero response bytes. This establishes connectivity, but
+neither an AT interpreter nor a shell. A later passive connection was refused.
+
+Native FTP listed System as containing MMS and Java. MMS contents were not read.
+System/Java contained 20 entries; numbered JAR sizes matched the four apps delivered
+by this project. Before reading suite 3 metadata, its installed 8,500-byte JAR was
+read back and compared in full to the known v0.7 original. Only that owned suite's
+3.jdx, 3.mss and 3.raw were then read, bounded by listed sizes (1,177, 58 and 404
+bytes). Installer metadata was not modified. Raw captures remain private.
+
+The owned 3.jdx contains gfs://java/3.jad and gfs://java/3.jar. This is an observed
+installer namespace, not proof of an accessible GCF protocol or native shell.
+The 3.raw contains this project's manifest; no firmware vendor was identified.
+The binary 3.mss format is unknown and was not patched.
+
+Mero Files v0.8 adds PATHS: bounded probes of E, C, D, A, F and Z roots, followed
+by the owned gfs JAR URL. It records connection implementation classes and root
+existence without directory traversal. Only the owned GFS JAR header may be read,
+up to 16 bytes. A timeout stops remaining probes.
+
+The delivered v0.8 artifacts passed exact saved-size and full-content readback:
+JAR 10,704 bytes, SHA-256
+fbc17695b668d159cb45131f94d30842ed9b7805fc6f5b39666a23ac0a7a9a2f;
+JAD 380 bytes, SHA-256
+fc3dcf2479624f9cb14a0b9cf7722f5f2cedbf558fd13968d1950bc095328114.
+Installation and PATHS results are pending. Confirm the installed suite number
+still belongs to this app before probing its internal GFS URL.

@@ -4,6 +4,8 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import javax.microedition.io.Connector;
 import javax.microedition.io.CommConnection;
+import javax.microedition.io.Connection;
+import javax.microedition.io.StreamConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 import javax.microedition.lcdui.Command;
@@ -28,10 +30,11 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     private String inboxStatus = "not checked";
     private String capabilities = "";
     private String serialReport = "serial_status=not tested\n";
+    private String pathReport = "path_status=not tested\n";
 
     protected void startApp() {
         if (roots == null) {
-            roots = new List("MERO FILES v0.7 - storage", List.IMPLICIT);
+            roots = new List("MERO FILES v0.8 - storage", List.IMPLICIT);
             roots.addCommand(exit);
             roots.setCommandListener(this);
             try {
@@ -53,7 +56,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private void show(String message) {
-        status = new Form("MERO FILES v0.7");
+        status = new Form("MERO FILES v0.8");
         status.append(message);
         status.addCommand(exit);
         status.setCommandListener(this);
@@ -83,13 +86,17 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
                     String id = field(message, "id");
                     String command = field(message, "command");
                     if (id.length() > 0 && id.length() <= 64 && !id.equals(ack)
-                            && (command.equals("PING") || command.equals("INFO") || command.equals("SERIAL"))) {
+                            && (command.equals("PING") || command.equals("INFO") || command.equals("SERIAL") || command.equals("PATHS"))) {
                         commandStatus = "accepted " + command;
                         ack = id;
                         if (command.equals("SERIAL")) {
                             stage = "probe Java serial";
                             serialReport = probeSerial();
                             result = "SERIAL DONE";
+                        } else if (command.equals("PATHS")) {
+                            stage = "probe filesystem routes";
+                            pathReport = probePaths();
+                            result = "PATHS DONE";
                         } else result = command.equals("PING") ? "PONG" : "INFO OK";
                         stage = "write response";
                         writeResponse();
@@ -152,8 +159,74 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             + "\nheap_total=" + vm.totalMemory() + "\ncolors=" + Display.getDisplay(this).numColors()
             + "\nfileconnection_version=" + property("microedition.io.file.FileConnection.version")
             + "\nmedia_version=" + property("microedition.media.version")
-            + "\napp_version=0.7\nphone_time_ms=" + System.currentTimeMillis()
-            + "\n" + capabilities + serialReport + "end=1\n";
+            + "\napp_version=0.8\nphone_time_ms=" + System.currentTimeMillis()
+            + "\n" + capabilities + serialReport + pathReport + "end=1\n";
+    }
+
+    private String probePaths() throws Exception {
+        String[] urls = { "file:///E:/", "file:///C:/", "file:///D:/", "file:///A:/",
+            "file:///F:/", "file:///Z:/", "gfs://java/3.jar" };
+        StringBuffer data = new StringBuffer();
+        for (int i = 0; i < urls.length && !stopped; i++) {
+            PathProbe probe = new PathProbe(urls[i], i);
+            new Thread(probe).start();
+            long deadline = System.currentTimeMillis() + 8000;
+            while (!probe.finished && !stopped && System.currentTimeMillis() < deadline) Thread.sleep(100);
+            if (!probe.finished) {
+                probe.cancelled = true;
+                try { if (probe.connection != null) probe.connection.close(); } catch (Exception error) { }
+                data.append("path_").append(i).append("_url=").append(urls[i]).append('\n');
+                data.append("path_").append(i).append("_status=timeout\npath_status=stopped at timeout\n");
+                return data.toString();
+            }
+            data.append(probe.report);
+        }
+        return data.append("path_status=done\n").toString();
+    }
+
+    private final class PathProbe implements Runnable {
+        final String url;
+        final int number;
+        volatile boolean finished;
+        volatile boolean cancelled;
+        volatile Connection connection;
+        String report;
+        PathProbe(String url, int number) { this.url = url; this.number = number; }
+        public void run() {
+            String prefix = "path_" + number + "_";
+            StringBuffer data = new StringBuffer(prefix + "url=" + url + "\n");
+            try {
+                connection = Connector.open(url);
+                if (cancelled) return;
+                data.append(prefix).append("class=").append(connection.getClass().getName()).append('\n');
+                if (connection instanceof FileConnection) {
+                    FileConnection file = (FileConnection) connection;
+                    data.append(prefix).append("exists=").append(file.exists()).append('\n');
+                    if (file.exists()) data.append(prefix).append("directory=").append(file.isDirectory()).append('\n');
+                }
+                if (url.equals("gfs://java/3.jar") && connection instanceof StreamConnection) {
+                    InputStream input = ((StreamConnection) connection).openInputStream();
+                    try {
+                        StringBuffer hex = new StringBuffer();
+                        String digits = "0123456789abcdef";
+                        for (int i = 0; i < 16 && !cancelled; i++) {
+                            int c = input.read();
+                            if (c < 0) break;
+                            hex.append(digits.charAt((c & 255) >> 4)).append(digits.charAt(c & 15));
+                        }
+                        data.append(prefix).append("owned_jar_header_hex=").append(hex).append('\n');
+                    } finally { input.close(); }
+                }
+                data.append(prefix).append("status=opened\n");
+            } catch (Exception error) {
+                data.append(prefix).append("status=error\n");
+                data.append(prefix).append("error=").append(error.toString().replace('\n', ' ').replace('\r', ' ')).append('\n');
+            } finally {
+                try { if (connection != null) connection.close(); } catch (Exception error) { }
+                report = data.toString();
+                finished = true;
+            }
+        }
     }
 
     private String probeSerial() throws Exception {

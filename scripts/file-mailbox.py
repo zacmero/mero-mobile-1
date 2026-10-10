@@ -33,7 +33,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('address', help='Paired phone Bluetooth address')
     parser.add_argument('--folder', default='MeroMailbox', help='Mailbox path relative to OBEX root')
-    parser.add_argument('--command', choices=('PING', 'INFO', 'SERIAL'), help='Omit to read startup diagnostics')
+    parser.add_argument('--command', choices=('PING', 'INFO', 'SERIAL', 'PATHS'), help='Omit to read startup diagnostics')
     parser.add_argument('--transport', choices=('opp', 'ftp'), default='opp', help='Command delivery; OPP works on this phone')
     parser.add_argument('--inbox', default='Ebook', help='OBEX folder where native OPP saves command.txt')
     parser.add_argument('--ftp-channel', type=int, choices=range(1, 31), help='Measured FTP RFCOMM channel')
@@ -160,6 +160,8 @@ def main():
                     if command_id is None or fields['ack'] == command_id:
                         if args.command == 'PING' and fields['result'] != 'PONG':
                             raise ValueError('PING did not return PONG')
+                        if args.command == 'PATHS' and fields['result'] != 'PATHS DONE':
+                            raise ValueError('PATHS did not complete')
                         if args.command == 'SERIAL' and fields['result'] != 'SERIAL DONE':
                             raise ValueError('SERIAL did not complete')
                         if args.command == 'INFO' and fields['result'] != 'INFO OK':
