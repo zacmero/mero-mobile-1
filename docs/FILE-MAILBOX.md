@@ -15,16 +15,17 @@ Build, transfer, and verify before installation:
     rtk proxy python scripts/verify-bluetooth.py PHONE_ADDRESS --folder Bt build/MeroFiles.jar build/MeroFiles.jad
 
 Require exact saved sizes and full-content readback. Install the verified files,
-launch `MERO FILES v0.1`, and allow filesystem access if prompted. The first
+launch `MERO FILES v0.2`, and allow filesystem access if prompted. The first
 screen lists storage roots only. Select the microSD root if identifiable;
 otherwise report the offered roots before choosing. The app creates
 `MeroMailbox/` under the selected root and shows its full Java file URL.
 
-The app accesses only `MeroMailbox/command.txt` and
-`MeroMailbox/response.txt`. It does not list personal files. The response is
+v0.2 reads only `Ebook/command.txt` and writes only
+`MeroMailbox/response.txt` under the selected root. v0.1 originally read commands
+inside MeroMailbox, but native FTP uploads failed. It does not list personal files. The response is
 overwritten with a fresh snapshot at startup and after each accepted command.
-The mailbox is intentionally a dedicated app folder; existing files bearing
-these two names in that folder are mailbox data.
+The mailbox is intentionally a dedicated app folder; the existing response.txt in that folder is mailbox data. Ebook/command.txt
+is the app command inbox, verified separately; no other ebook files are read.
 
 ## Protocol
 
@@ -37,12 +38,12 @@ with runtime and memory diagnostics. Commands have a 4 KiB bound.
 The final marker lets the reader reject incomplete files, and command IDs
 distinguish stale responses. A transfer may still race a read; the host must
 retry incomplete reads and require the matching acknowledgement. This is
-file-based communication with Bluetooth transfer latency, not a shell or
-a guaranteed low-latency stream.
+file-based communication with Bluetooth transfer latency and manual incoming-file acceptance, not a shell or
+a guaranteed low-latency stream. Each session connects and disconnects normally.
 
 The computer uses the corresponding OBEX folder path, which may differ from
-the Java root name. Both the Java write and the OBEX read/write permissions
-must work. API presence alone is insufficient. Handset execution and a
+the Java root name. Java response writes, Java command reads, native Object
+Push reception, and native OBEX FTP reads must work. API presence alone is insufficient. Handset execution and a
 real `PING` / `PONG` round trip are pending.
 
 ## Computer operation
@@ -55,8 +56,11 @@ Then require a matching PING acknowledgement:
 
     rtk proxy python scripts/file-mailbox.py PHONE_ADDRESS --folder MeroMailbox --command PING
 
-The client uses FTP PutFile into the mailbox, verifies command content by full
-readback, then polls only response.txt. It validates protocol, unique fields,
+By default, the client delivers command.txt through native Object Push,
+verifies its content in Ebook by full FTP readback, then polls only response.txt
+in MeroMailbox. Accept the phone reception prompt and overwrite the app command
+file if offered. The experimental --transport ftp route is retained but timed out
+on this phone. A successful OPP command save in Ebook was measured, not guessed. It validates protocol, unique fields,
 size bounds, the final marker, and command acknowledgement/result. It saves
 the snapshot in ignored logs/file-mailbox-latest.json. Logs may contain private
 storage/runtime details; do not commit them. Override --folder if the Java root
@@ -112,3 +116,23 @@ the host OBEX log reported a timeout waiting for response. The retry also failed
 file/access prompt appeared. This is not yet a
 successful two-way command exchange. Do not confuse the startup response with
 a PING acknowledgement.
+
+## v0.2 command inbox workaround
+
+The owner confirmed the native FTP receive prompt appeared but the download
+failed; Mero Files remained ready. Native Object Push then delivered the same
+64-byte command successfully. Full FTP readback verified it in Ebook with
+SHA-256 b4785fcb76d32dc13a57b85214073234a5382f499baaed58d7259f2834c205a3.
+The command is bounded diagnostic data, not executable Java or native code.
+
+v0.2 reads Ebook/command.txt and keeps responses in MeroMailbox. Its artifacts
+were transferred and fully verified before requesting installation:
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| MeroFiles.jar | 4,193 | a4a34c989a725af5b60dd8bf13d499a7d6a3769ff97285cf5fb5e965f0ca23bf |
+| MeroFiles.jad | 342 | c6033da45ce642e85f6e920765f899012b2eb1d92b7c857b61440fb01d8a28dd |
+
+The v0.2 launch and matching PONG readback remain pending. Ordinary reconnects
+between separate OPP/FTP sessions are expected. Reception prompts still require
+the owner; fully unattended command delivery is not established.

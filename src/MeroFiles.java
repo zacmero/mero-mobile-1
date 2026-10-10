@@ -26,7 +26,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
 
     protected void startApp() {
         if (roots == null) {
-            roots = new List("MERO FILES v0.1 - storage", List.IMPLICIT);
+            roots = new List("MERO FILES v0.2 - storage", List.IMPLICIT);
             roots.addCommand(exit);
             roots.setCommandListener(this);
             try {
@@ -48,7 +48,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private void show(String message) {
-        status = new Form("MERO FILES v0.1");
+        status = new Form("MERO FILES v0.2");
         status.append(message);
         status.addCommand(exit);
         status.setCommandListener(this);
@@ -65,7 +65,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             } finally { folder.close(); }
             stage = "write startup diagnostics";
             writeResponse();
-            show("Mailbox ready\n" + directory + "\nWaiting for computer commands");
+            show("Mailbox ready\n" + directory + "\nReading Ebook/command.txt");
             while (!stopped) {
                 stage = "read command";
                 String message = readCommand();
@@ -88,7 +88,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private String readCommand() throws Exception {
-        FileConnection file = (FileConnection) Connector.open(directory + "command.txt", Connector.READ);
+        FileConnection file = (FileConnection) Connector.open(directory.substring(0, directory.length() - "MeroMailbox/".length()) + "Ebook/command.txt", Connector.READ);
         try {
             if (!file.exists()) return null;
             if (file.fileSize() > 4096) return null;

@@ -54,3 +54,13 @@ Owner selected E:/ and reported Mailbox ready. Native OBEX retrieved the Java-wr
 MeroMailbox/response.txt startup snapshot; Java storage writes and Bluetooth reads
 are proven. Initial FTP command PutFile timed out; PING acknowledgement is not yet
 proven. See FILE-MAILBOX.md for the full automated snapshot and pending retry.
+
+## Command delivery workaround
+
+Native FTP PutFile showed a phone receive prompt but failed twice. Native OPP
+delivered a 64-byte PING command into Ebook; full readback verified it. Mero Files
+v0.2 now reads Ebook/command.txt, writes MeroMailbox/response.txt. The updated
+4,193-byte JAR and 342-byte JAD were fully verified in Bt. Owner was asked to
+install v0.2 and select E:/; matching PONG is pending. file-mailbox.py defaults
+to OPP command delivery followed by readback verification and response polling.
+Incoming-file acceptance remains manual. No unattended or low-latency claim.

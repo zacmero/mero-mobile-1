@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 import tempfile
 import time
+import subprocess
+import sys
 
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
@@ -32,12 +34,25 @@ def main():
     parser.add_argument('address', help='Paired phone Bluetooth address')
     parser.add_argument('--folder', default='MeroMailbox', help='Mailbox path relative to OBEX root')
     parser.add_argument('--command', choices=('PING', 'INFO'), help='Omit to read startup diagnostics')
+    parser.add_argument('--transport', choices=('opp', 'ftp'), default='opp', help='Command delivery; OPP works on this phone')
+    parser.add_argument('--inbox', default='Ebook', help='OBEX folder where native OPP saves command.txt')
     parser.add_argument('--timeout', type=int, default=60)
     args = parser.parse_args()
     if args.timeout < 1 or args.timeout > 300:
         parser.error('Timeout must be 1..300 seconds')
     if not args.folder or any(part in ('.', '..') for part in args.folder.split('/')):
         parser.error('Use a mailbox folder path without dot components')
+    command_id = str(time.time_ns()) if args.command else None
+    command = (('protocol=mero-files/1\nid=' + command_id + '\ncommand='
+                + args.command + '\nend=1\n').encode('utf-8') if args.command else None)
+    if args.command and args.transport == 'opp':
+        scripts = Path(__file__).resolve().parent
+        with tempfile.TemporaryDirectory(prefix='mero-command-') as directory:
+            source = Path(directory) / 'command.txt'
+            source.write_bytes(command)
+            subprocess.run([sys.executable, str(scripts / 'send-bluetooth.py'), args.address, str(source)], check=True)
+            subprocess.run([sys.executable, str(scripts / 'verify-bluetooth.py'), args.address,
+                            '--folder', args.inbox, str(source)], check=True)
     DBusGMainLoop(set_as_default=True)
     bus = dbus.SessionBus()
     client = dbus.Interface(bus.get_object('org.bluez.obex', '/org/bluez/obex'), 'org.bluez.obex.Client1')
@@ -104,11 +119,7 @@ def main():
                     raise ValueError('Readback exceeds size bound')
                 return data
 
-            command_id = None
-            if args.command:
-                command_id = str(time.time_ns())
-                command = ('protocol=mero-files/1\nid=' + command_id + '\ncommand='
-                           + args.command + '\nend=1\n').encode('utf-8')
+            if args.command and args.transport == 'ftp':
                 source = local / 'command.txt'
                 source.write_bytes(command)
                 transfer(lambda: ftp.PutFile(str(source), 'command.txt', timeout=35))
