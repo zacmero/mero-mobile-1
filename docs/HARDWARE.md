@@ -136,3 +136,18 @@ Do not commit raw contacts, messages, network passwords, IMEI, serials, or devic
 - Original server logs stored only validated diagnostic snapshots and omitted browser/rejected requests. Fixed logging to record redacted HTTP request metadata separately.
 - Mero HTTP v0.2 uses GET by default, permits switching to POST and reports the failure stage. Delivered and read back the update: JAR 6,846 bytes, JAD 290 bytes; both full contents matched the originals. Exact hashes are in `docs/HTTP-LINK.md`.
 - v0.2 handset observation and Java command round trip remain pending. Key code `-6` reported by the owner is the app's keypad measurement, separate from the network error.
+
+## Photographed runtime diagnostics (2026-10-10 UTC)
+
+See [the complete screen transcription](SCREEN-DIAGNOSTICS.md) for every field.
+The app reports CLDC-1.1 / MIDP-2.0, j2me, zh-CN; Java heap free
+1,611,804 bytes and total 2,486,656 bytes; Canvas 320 × 215 and 65,535
+colors; last key -6. FileConnection class present, version 1.0; multimedia
+class present, version 1.2; Java Bluetooth LocalDevice class absent.
+Sequence 35, acknowledgement none and startup result do not establish any
+successful network exchange. The photos do not identify the native OS.
+
+Java HTTP failed at response status and TCP failed at open TCP socket with
+ConnectionNotFoundException; native browser LAN access works. The observed
+Java network settings offer SIM/CMCC WAP/MMS profiles. The next measured
+experiment is filesystem access plus native Bluetooth mailbox transfer.

@@ -70,3 +70,6 @@ The JAD initially failed to transfer; resending succeeded. Both saved files then
 | `MeroHTTP.jad` | 329 | `28fb8c08612f66bb4981a4b8297ae79942dcf9b132c05847b9dead42483f2b05` |
 
 A host TCP request matching the new transport received HTTP 200 and a diagnostic command. Packaging checks confirmed socket permission in the manifest and descriptor. These checks do not establish handset socket support or Wi-Fi routing. No handset request was present in the server logs at delivery; The owner subsequently reported TCP failing at `open TCP socket` with `javax.microedition.io.ConnectionNotFoundException` and a socket-open failure message. No handset connection or two-way command round trip is established. Combined with the HTTP response-status failure and observed SIM/WAP-only Java settings, this suggests a Java network-bearer limitation; it does not prove that all Java networking is impossible. The next capability to check is JSR-75 FileConnection for a possible file mailbox carried through native Bluetooth OBEX.
+
+All photographed local diagnostics are transcribed in [screen diagnostics](SCREEN-DIAGNOSTICS.md).
+The confirmed FileConnection class/version motivates the [file mailbox experiment](FILE-MAILBOX.md).

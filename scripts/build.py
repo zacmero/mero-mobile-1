@@ -19,13 +19,15 @@ TOOLS = {
 }
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--java', default=shutil.which('java'), help='Java executable (8 or later)')
-parser.add_argument('--app', choices=('hello', 'link', 'http'), default='hello')
+parser.add_argument('--app', choices=('hello', 'link', 'http', 'files'), default='hello')
 args = parser.parse_args()
 if not args.java:
     parser.error('Java runtime missing; provide --java /path/to/bin/java')
 CACHE.mkdir(parents=True, exist_ok=True)
 if args.app == 'link':
     TOOLS['bluecove'] = ('net/sf/bluecove/bluecove/2.1.0/bluecove-2.1.0.jar', 'add9a58dbee3eaa35a062010a11066ba772a72119f24165f4adf0e19e60a4b8a')
+if args.app == 'files':
+    TOOLS['jsr75'] = ('org/microemu/microemu-jsr-75/2.0.4/microemu-jsr-75-2.0.4.jar', 'd4372cf344ee03f0261ae58bd3d2becb4aed98272bca7c6bb98749efd11b4601')
 for name, (url, digest) in TOOLS.items():
     file = CACHE / (name + '.jar')
     if not file.exists():
@@ -38,13 +40,15 @@ for name, (url, digest) in TOOLS.items():
         raise RuntimeError('Cached checksum mismatch: ' + name)
 
 build = ROOT / 'build'
-app = {'hello': 'MeroHello', 'link': 'MeroLink', 'http': 'MeroHTTP'}[args.app]
+app = {'hello': 'MeroHello', 'link': 'MeroLink', 'http': 'MeroHTTP', 'files': 'MeroFiles'}[args.app]
 classes = build / (app + '-classes')
 if classes.exists():
     shutil.rmtree(classes)
 classes.mkdir(parents=True, exist_ok=True)
 apis = [str(CACHE / (name + '.jar')) for name in ('cldcapi10', 'midpapi20')]
 sources = [str(ROOT / ('src/' + app + '.java'))]
+if args.app == 'files':
+    apis.append(str(CACHE / 'jsr75.jar'))
 if args.app == 'link':
     apis.append(str(CACHE / 'bluecove.jar'))
     sources.append(str(ROOT / 'src/BluetoothLink.java'))
@@ -55,7 +59,7 @@ if args.app == 'http':
     sources.append(str(generated))
 subprocess.run([args.java, '-jar', str(CACHE / 'ecj.jar'), '-source', '1.3', '-target', '1.1',
                 '-bootclasspath', ':'.join(apis), '-d', str(classes)] + sources, check=True)
-name = {'hello': 'Mero Hello', 'link': 'Mero Link', 'http': 'Mero HTTP'}[args.app]
+name = {'hello': 'Mero Hello', 'link': 'Mero Link', 'http': 'Mero HTTP', 'files': 'Mero Files'}[args.app]
 profile = 'MIDP-1.0' if args.app == 'hello' else 'MIDP-2.0'
 version = '0.3.0' if args.app == 'http' else '0.1.0'
 manifest = ('Manifest-Version: 1.0\r\nMIDlet-Name: ' + name + '\r\nMIDlet-Version: ' + version + '\r\n'
@@ -66,6 +70,9 @@ if args.app == 'link':
 if args.app == 'http':
     manifest += ('MIDlet-Permissions-Opt: javax.microedition.io.Connector.http,\r\n'
                  ' javax.microedition.io.Connector.socket\r\n')
+if args.app == 'files':
+    manifest += ('MIDlet-Permissions-Opt: javax.microedition.io.Connector.file.read,\r\n'
+                 ' javax.microedition.io.Connector.file.write\r\n')
 unverified = build / (app + '-unverified.jar')
 output = build / (app + '.jar')
 with zipfile.ZipFile(unverified, 'w', zipfile.ZIP_DEFLATED) as jar:

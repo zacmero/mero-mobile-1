@@ -15,7 +15,7 @@ This repository documents and experiments with an unusual older mobile phone. Th
 - **Two cameras**: a normal camera and an additional top-facing camera described by the owner as a “spy camera”; both are low-resolution.
 - **Four-SIM design**; exact modem/chipset and whether all slots operate simultaneously have not been measured.
 - Plugging its USB cable into an Arch Linux host has **not yet produced a usable mounted device**, including the microSD card. We must first determine whether USB enumerates at all.
-- **Mero Hello runs:** the runtime reports `CLDC1.1`, `MIDP-2.0`, platform `j2me`, locale `zh-CN`, and a Java heap total of 2,486,656 bytes in one measurement. Screen dimensions, physical RAM, firmware, SoC and native OS remain unknown.
+- **Mero Hello runs:** the runtime reports `CLDC1.1`, `MIDP-2.0`, platform `j2me`, locale `zh-CN`, and a Java heap total of 2,486,656 bytes in one measurement. The photographed Canvas is 320 × 215 with 65,535 reported colors. FileConnection (JSR-75) and multimedia (JSR-135) classes are present; Java Bluetooth (JSR-82) is absent. Physical RAM, firmware, SoC and native OS remain unknown.
 
 **Do not infer Android, Linux, a command shell, MediaTek chip identifiers, or any supported Java optional API from the Java menu alone.** A classic Java ME (J2ME) implementation on a proprietary feature-phone OS is plausible, but currently a hypothesis.
 
@@ -62,11 +62,14 @@ The first app should be a short, offline **Mero Hello** with screen size, heap n
 - [scripts/send-bluetooth.py](scripts/send-bluetooth.py) — sends files to a paired phone using BlueZ OBEX.
 - [scripts/verify-bluetooth.py](scripts/verify-bluetooth.py) — checks exact phone-saved sizes and compares complete file readbacks with the originals.
 - [docs/BLUETOOTH-LINK.md](docs/BLUETOOTH-LINK.md) — Mero Link probe and saved-file verification; Java cannot load the JSR-82 LocalDevice class on this handset.
-- [docs/HTTP-LINK.md](docs/HTTP-LINK.md) — LAN diagnostic server and GET/POST phone probe; browser reachability confirmed, live Java connection pending.
+- [docs/HTTP-LINK.md](docs/HTTP-LINK.md) — LAN diagnostic server and GET/POST/TCP phone probe; browser reachability confirmed, Java HTTP and TCP attempts failed.
+
+- [docs/SCREEN-DIAGNOSTICS.md](docs/SCREEN-DIAGNOSTICS.md) — complete transcription and limits of the photographed runtime screen.
+- [docs/FILE-MAILBOX.md](docs/FILE-MAILBOX.md) — filesystem probe and native Bluetooth mailbox experiment.
 
 ## Current state
 
-**First MIDlet milestone achieved.** Bluetooth delivery, Java installation and Mero Hello execution succeeded. The build targets CLDC 1.0 / MIDP 1.0; the phone reports CLDC 1.1 / MIDP 2.0. USB detection, native OS, display/input measurements and optional Java APIs remain open. See the hardware session log for results and the required received-file size check.
+**First MIDlet milestone achieved.** Bluetooth delivery, Java installation and Mero Hello execution succeeded. The build targets CLDC 1.0 / MIDP 1.0; the phone reports CLDC 1.1 / MIDP 2.0. Canvas dimensions and optional API class presence are measured. USB detection, native OS, and actual optional API operation remain open. The next experiment is a file mailbox over native Bluetooth. See the hardware session log for results and the required received-file size check.
 
 ## References
 

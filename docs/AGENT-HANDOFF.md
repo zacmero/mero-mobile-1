@@ -11,7 +11,7 @@ You are helping with **mero-mobile-1**, a playful hardware archaeology and Java 
 - Four-SIM form factor.
 - Connecting USB has **not yielded a mounted phone/card** on Linux. USB enumeration itself has *not* been established.
 - Mero Hello installed and launched. Runtime reports configuration `CLDC1.1`, profile `MIDP-2.0`, platform `j2me`, locale `zh-CN`; heap free 1,846,308 bytes and total 2,486,656 bytes in one observation.
-- Exact OS, SoC, physical RAM, storage map, optional Java APIs and native shell remain unknown. Java heap values are not physical RAM measurements.
+- Exact OS, SoC, physical RAM, storage map, native shell remain unknown. Photographs establish FileConnection and multimedia class presence, but actual API functionality remains unconfirmed. Java heap values are not physical RAM measurements.
 
 ## Instructions
 1. Begin with docs/RECON-001.md and extend docs/HARDWARE.md using only measured/owner-observed facts.
@@ -25,8 +25,10 @@ You are helping with **mero-mobile-1**, a playful hardware archaeology and Java 
 9. Repo is public: redact IMEI, full MAC addresses when unnecessary, contacts, passwords, SIM data and personal files.
 10. Prefer one small documented experiment at a time; finish with observed result, explanation and next step.
 11. **Owner requirement: verify the received file's exact byte size against the source before every installation or execution.** A first app transfer was truncated/corrupted despite host-side completion reports. Bluetooth or HTTP success is not evidence of an intact saved file. Rounded KB values are insufficient; if exact size cannot be checked, keep installation/execution pending. A matching size detects truncation but does not establish byte-for-byte integrity; compare a checksum too when feasible.
-12. OBEX FTP readback verification works: `scripts/verify-bluetooth.py PHONE_ADDRESS --folder Bt LOCAL_FILES`. Use it after every artifact delivery. Mero Link was delivered and verified (5,392-byte JAR, 302-byte JAD), then launched through JAD and JAR. Both reported Bluetooth unavailable/ClassNotFoundException for the attempted `javax.bluetooth.LocalDevice`. No Java RFCOMM listener started; native OBEX still works. `Key: 0` is the app's initial keypad value. See `docs/BLUETOOTH-LINK.md`; next live-link experiment is Java HTTP over Wi-Fi.
-13. HTTP server/client exist; see `docs/HTTP-LINK.md`. Phone browser reached the LAN server, but v0.1 Java POST returned IOException with no snapshot. v0.2 GET/POST update was delivered and fully verified (6,846-byte JAR, 290-byte JAD); its launch/result remains pending. Request logs now include browser/rejected-request metadata with endpoint tokens redacted. The LAN firewall test rule expires after one hour. Keep exact app/transport/failure stage distinct; a browser download is not a Java command-channel result.
+12. OBEX FTP readback verification works: `scripts/verify-bluetooth.py PHONE_ADDRESS --folder Bt LOCAL_FILES`. Use it after every artifact delivery. Mero Link was delivered and verified (5,392-byte JAR, 302-byte JAD), then launched through JAD and JAR. Both reported Bluetooth unavailable/ClassNotFoundException for the attempted `javax.bluetooth.LocalDevice`. No Java RFCOMM listener started; native OBEX still works. `Key: 0` is the app's initial keypad value. See `docs/BLUETOOTH-LINK.md`; Java HTTP/TCP experiments subsequently failed; the next route is a JSR-75 file mailbox over native Bluetooth.
+13. HTTP server/client exist; see `docs/HTTP-LINK.md`. Phone browser reached the LAN server, but Java v0.2 GET failed at response status with IOException; v0.3 TCP failed at open TCP socket with ConnectionNotFoundException. Observed Java settings expose SIM/CMCC WAP/MMS profiles with no WLAN choice. No handset upload or command round trip is established. v0.3 was fully readback-verified (7,761-byte JAR, 329-byte JAD). The LAN firewall rule expires after one hour.
+14. All owner-photographed diagnostics are transcribed in `docs/SCREEN-DIAGNOSTICS.md`, including exact heap, Canvas, key, counters and API/version values. JSR-75=true, JSR-135=true, JSR-82=false; FileConnection version 1.0 and media version 1.2. Presence is not a functional or permission test.
+15. `MeroFiles` and `scripts/file-mailbox.py` implement a dedicated MeroMailbox folder with bounded PING/INFO command and response files. See `docs/FILE-MAILBOX.md`. Build succeeded (4,182-byte JAR, 342-byte JAD), but initial Bluetooth attempts timed out or returned OBEX Connect 0x40. Delivery/readback and handset execution remain pending. Ask the owner to exit the previous app and restore Bluetooth visibility; never install unverified files. Select the actual storage root, then map its mailbox to the OBEX path before writing commands.
 
 ## First success criteria
 - OS/firmware evidence and actual USB behavior captured (even if no device detected).
@@ -36,7 +38,7 @@ You are helping with **mero-mobile-1**, a playful hardware archaeology and Java 
 
 ## Next experiments
 - Owner reaffirmed that identifying the native OS and investigating genuine shell access are main goals, alongside making the phone useful to this computer. Treat Java diagnostics as an evidence-gathering route, not a promise of native access.
-- Next live communication route: Java HTTP over the LAN, after confirming Java's Wi-Fi routing. Probe optional filesystem APIs separately. Standard Java ME file access does not establish control of USB enumeration or native OS access.
+- Next live communication route: the dedicated JSR-75 file mailbox carried through native OBEX FTP. Java HTTP/TCP failed on this handset; a separate Java bearer limitation is suspected, not proven. Standard Java ME file access does not establish control of USB enumeration or native OS access.
 - Native Bluetooth Serial Port `sprd_com3` (RFCOMM channel 3) remains a distinct candidate for protocol identification. Do not call it a shell or send guessed vendor/service commands without identifying the protocol.
 - Display and input measurement, heap usage, optional APIs.
 - LAN text fetch over Java if networking permissions/API permit it.
