@@ -3,6 +3,7 @@
 import argparse
 from datetime import datetime, timezone
 import hmac
+from html import escape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
@@ -47,7 +48,9 @@ class Handler(BaseHTTPRequestHandler):
         route = 'health' if path == '/' else 'diagnostics' if hmac.compare_digest(path, '/' + token) else 'other'
         entry = {'received_at': datetime.now(timezone.utc).isoformat(), 'remote_address': self.client_address[0],
                  'method': self.command, 'route': route, 'status': code, 'http_version': self.request_version,
-                 'user_agent': self.headers.get('User-Agent', '')}
+                 'user_agent': self.headers.get('User-Agent', ''),
+                 'accept': self.headers.get('Accept', ''),
+                 'wap_profile': self.headers.get('X-Wap-Profile', self.headers.get('Profile', ''))}
         with lock:
             with (LOGS / 'http-requests.jsonl').open('a') as log:
                 log.write(json.dumps(entry) + '\n')
@@ -65,7 +68,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         url = urlsplit(self.path)
-        if url.path == '/':
+        if url.path.startswith('/link'):
+            self.browser_link(url)
+        elif url.path == '/':
             self.reply(200, '<html><body>Mero HTTP diagnostic server ready</body></html>\n', 'text/html; charset=utf-8')
         elif not hmac.compare_digest(url.path, '/' + token):
             self.reply(404, 'Not found\n')
@@ -81,6 +86,57 @@ class Handler(BaseHTTPRequestHandler):
                 self.diagnostics(query['data'][0].encode('utf-8'))
             except ValueError:
                 self.reply(400, 'Invalid diagnostics\n')
+
+    def browser_link(self, url):
+        if len(self.path) > 2048 or url.path not in ('/link', '/link.wml', '/link/status', '/link/send'):
+            self.reply(404, 'Not found\n')
+            return
+        wants_wml = url.path == '/link.wml' or ('wml' in self.headers.get('Accept', '').lower()
+                                              and 'text/html' not in self.headers.get('Accept', '').lower())
+        title = 'Mero WiFi Link'
+        message = 'Connected to the computer. No Java app is needed for this page.'
+        if url.path == '/link/status':
+            title = 'Computer answered'
+            message = 'Computer time: ' + datetime.now(timezone.utc).isoformat()
+        elif url.path == '/link/send':
+            try:
+                values = parse_qs(url.query, strict_parsing=True, max_num_fields=1)
+                if set(values) != {'message'} or len(values['message']) != 1 or not 1 <= len(values['message'][0]) <= 160:
+                    raise ValueError('Invalid message')
+                text = values['message'][0]
+            except ValueError:
+                self.reply(400, 'Send 1..160 characters\n')
+                return
+            event = {'received_at': datetime.now(timezone.utc).isoformat(),
+                     'remote_address': self.client_address[0], 'user_agent': self.headers.get('User-Agent', ''),
+                     'message': text}
+            with lock:
+                target = LOGS / 'browser-link-events.jsonl'
+                with target.open('a') as stream:
+                    stream.write(json.dumps(event) + '\n')
+                target.chmod(0o600)
+            title = 'Computer received'
+            message = text
+            print('Phone browser message received', flush=True)
+        title, message = escape(title), escape(message)
+        if wants_wml:
+            body = ('<?xml version="1.0"?>\n'
+                    '<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">\n'
+                    '<wml><card id="main" title="' + title + '"><p>' + message + '</p>'
+                    '<p><a href="/link/status">Ping computer</a></p>'
+                    '<p>Message: <input name="message" maxlength="160"/></p>'
+                    '<do type="accept" label="Send"><go href="/link/send" method="get">'
+                    '<postfield name="message" value="$(message)"/></go></do>'
+                    '<p><a href="/link.wml">Home</a></p></card></wml>\n')
+            self.reply(200, body, 'text/vnd.wap.wml')
+        else:
+            body = ('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n'
+                    '<html><head><title>' + title + '</title></head><body><h3>' + title + '</h3><p>'
+                    + message + '</p><p><a href="/link/status">Ping computer</a></p>'
+                    '<form action="/link/send" method="get">Message: '
+                    '<input name="message" maxlength="160"><input type="submit" value="Send"></form>'
+                    '<p><a href="/link">Home</a> | <a href="/link.wml">WAP version</a></p></body></html>\n')
+            self.reply(200, body, 'text/html')
 
     def do_POST(self):
         self.connection.settimeout(10)

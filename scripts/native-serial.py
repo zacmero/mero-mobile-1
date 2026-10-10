@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 import socket
 import subprocess
+import select
+import sys
 import time
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -16,12 +18,13 @@ parser.add_argument('--line-ending', choices=('cr', 'crlf'), default='cr', help=
 parser.add_argument('--boot-version', action='store_true', help='Send one Spreadtrum CHECK_BAUD byte (0x7e); no loader or writes')
 parser.add_argument('--java-bridge', action='store_true', help='Reply to the known Java SERIAL identity queries; never execute peer input')
 parser.add_argument('--handsfree-identify', action='store_true', help='Query a measured HFP gateway channel; no dialing or call control')
+parser.add_argument('--console', action='store_true', help='Keep native HFP open; accept status, indicators and quit on stdin')
 parser.add_argument('--connect-wait', type=int, default=0, help='Retry refused connections for up to 30 seconds')
 parser.add_argument('--hold', action='store_true', help='Keep the connection open after probing')
 args = parser.parse_args()
 if not 0 <= args.connect_wait <= 30:
     parser.error('--connect-wait must be 0..30 seconds')
-if args.java_bridge and (args.identify or args.boot_version or args.hold or args.handsfree_identify):
+if args.java_bridge and (args.identify or args.boot_version or args.hold or args.handsfree_identify or args.console):
     parser.error('--java-bridge cannot be combined with other probe modes or --hold')
 if args.inquiry:
     subprocess.run(['bluetoothctl', '--timeout', '12', 'scan', 'on'],
@@ -101,24 +104,63 @@ try:
         result['boot_version_probe'] = {'sent_hex': '7e', 'response_hex': data.hex()}
         print('CHECK_BAUD: ' + str(len(data)) + ' response bytes', flush=True)
         save()
-    if args.identify or args.handsfree_identify:
-        commands = ('AT+BRSF=0', 'AT+CIND=?', 'AT+CGMI', 'AT+CGMM', 'AT+CGMR', 'AT+CLAC') if args.handsfree_identify else ('AT', 'ATI', 'AT+CGMI', 'AT+CGMM', 'AT+CGMR')
-        for command in commands:
-            sock.sendall((command + ('\r\n' if args.line_ending == 'crlf' else '\r')).encode('ascii'))
-            sock.settimeout(3)
-            data = bytearray()
-            deadline = time.monotonic() + 4
-            while len(data) < 8192 and time.monotonic() < deadline:
-                try:
-                    chunk = sock.recv(min(4096, 8192 - len(data)))
-                    if not chunk:
-                        raise ConnectionError('Serial peer closed the connection')
-                    data.extend(chunk)
-                except TimeoutError:
+    def query(command):
+        started = time.monotonic()
+        ending = '\r\n' if args.console or args.line_ending == 'crlf' else '\r'
+        sock.sendall((command + ending).encode('ascii'))
+        sock.settimeout(3)
+        data = bytearray()
+        deadline = time.monotonic() + 4
+        while len(data) < 8192 and time.monotonic() < deadline:
+            try:
+                chunk = sock.recv(min(4096, 8192 - len(data)))
+                if not chunk:
+                    raise ConnectionError('Serial peer closed the connection')
+                data.extend(chunk)
+                if b'\r\nOK\r\n' in data or b'\r\nERROR\r\n' in data:
                     break
-            result['queries'].append({'command': command, 'response_hex': data.hex()})
-            print(command + ': ' + str(len(data)) + ' response bytes', flush=True)
-            save()
+            except TimeoutError:
+                break
+        elapsed = round((time.monotonic() - started) * 1000, 1)
+        result['queries'].append({'command': command, 'response_hex': data.hex(), 'elapsed_ms': elapsed})
+        print(command + ': ' + str(len(data)) + ' response bytes, ' + str(elapsed) + ' ms', flush=True)
+        save()
+        return bytes(data)
+
+    if args.identify or args.handsfree_identify or args.console:
+        commands = ('AT+BRSF=0', 'AT+CIND=?', 'AT+CIND?', 'AT+CMER=3,0,0,1',
+                    'AT+CGMI', 'AT+CGMM', 'AT+CGMR', 'AT+GMI', 'AT+GMM', 'AT+GMR', 'AT+CLAC') if args.handsfree_identify else (
+                    ('AT+BRSF=0', 'AT+CIND=?', 'AT+CIND?', 'AT+CMER=3,0,0,1') if args.console else
+                    ('AT', 'ATI', 'AT+CGMI', 'AT+CGMM', 'AT+CGMR'))
+        for command in commands:
+            reply = query(command)
+            if args.console and b'\r\nOK\r\n' not in reply:
+                raise ConnectionError('HFP initialization failed at ' + command)
+    if args.console:
+        print('Native AT console ready: status, indicators, quit', flush=True)
+        allowed = {'status': 'AT+CIND?', 'indicators': 'AT+CIND=?'}
+        while True:
+            ready, _, _ = select.select([sock, sys.stdin], [], [], 1)
+            if sys.stdin in ready:
+                line = sys.stdin.readline()
+                if not line or line.strip() == 'quit':
+                    break
+                command = allowed.get(line.strip())
+                if command is None:
+                    print('Use status, indicators or quit', flush=True)
+                else:
+                    reply = query(command)
+                    print(reply.decode('ascii', 'replace').strip(), flush=True)
+                continue
+            if sock in ready:
+                chunk = sock.recv(4096)
+                if not chunk:
+                    raise ConnectionError('Native peer disconnected')
+                if len(result['unsolicited_hex']) >= 64:
+                    raise RuntimeError('Unsolicited capture limit reached')
+                result['unsolicited_hex'].append(chunk.hex())
+                print('Native event received (' + str(len(chunk)) + ' bytes)', flush=True)
+                save()
     if args.hold:
         print('Holding native serial connection; no further commands sent', flush=True)
         sock.settimeout(1)

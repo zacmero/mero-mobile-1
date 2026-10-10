@@ -1,5 +1,7 @@
 # Software routes toward native access
 
+The entries below record successive experiments. The latest outcome section supersedes earlier pending steps; USB monitoring and Bluetooth serial experiments are stopped at the owner's request.
+
 The owner explicitly authorized basic serial identification experiments and
 USB cold-boot discovery, prioritizing software investigation before board
 photographs. Native OS, chipset, console and shell remain unconfirmed.
@@ -244,3 +246,28 @@ The host server was renewed on channel 22 with a one-hour bounded lifetime.
 The v0.10 live SERIAL result is pending. Use a fresh command, allow sufficient
 permission/discovery time, and check both the matching mailbox response and host
 server data; accepted commands alone do not prove serial connectivity.
+
+## Latest outcome: v0.10 and stopped serial experiments
+
+The owner installed the fully verified v0.10 artifacts: JAR 11,457 bytes and
+JAD 381 bytes. A fresh 66-byte SERIAL command passed full saved-file readback;
+the matching response reported app_version=0.10, result=SERIAL DONE,
+serial_status=timeout and serial_stage=open comm:0. The longer opening window
+and plain comm:0 URL did not establish Java serial access. The advertised host
+SPP server received no Java peer connection and has now been closed.
+
+An additional native HFP session accepted the four service initialization
+commands AT+BRSF=0, AT+CIND=?, AT+CIND? and AT+CMER=3,0,0,1. Manufacturer/model/
+version variants and AT+CLAC returned ERROR. No dialing, call control or
+contact query was sent. This is measured limited AT access, not a native shell.
+
+The host utility now has a restricted `--console` mode with service
+initialization, `status`, `indicators`, `quit` and bounded unsolicited capture.
+Its live retries on the historical channel 4 were refused. Subsequent discovery
+reported HFP channel 7 after pairing; native channels must be rediscovered
+rather than cached across bond changes. The console is not live-verified.
+
+The owner requested ending the Bluetooth serial route. Do not restart those
+experiments or USB monitoring without new direction. The current software
+route is the native Wi-Fi browser endpoint in [HTTP-LINK.md](HTTP-LINK.md).
+No bootloader response, loader execution, firmware write or OS shell was obtained.

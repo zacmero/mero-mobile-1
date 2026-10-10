@@ -1,5 +1,7 @@
 # HTTP diagnostic connection
 
+Current direction: use the native Wi-Fi browser through the HTML/WML endpoint below. Java networking attempts remain unsuccessful. Earlier browser reachability was owner-reported; current request logs have not confirmed a native-browser round trip.
+
 Mero HTTP sends bounded diagnostic snapshots to this computer over LAN HTTP and receives small diagnostic commands in each response. The v0.1 handset attempt produced `java.io.IOException` without a received diagnostic snapshot. The phone browser could download the LAN server response, establishing browser reachability. v0.2 failed on the handset at `response status` with `java.io.IOException`. The observed Java connection settings offer SIM profiles (CMCC WAP/MMS), with no WLAN choice observed. v0.3 adds a direct TCP HTTP request to test whether the Java HTTP proxy layer is involved; a handset command round trip remains unconfirmed.
 
 ## Start the computer server
@@ -73,3 +75,23 @@ A host TCP request matching the new transport received HTTP 200 and a diagnostic
 
 All photographed local diagnostics are transcribed in [screen diagnostics](SCREEN-DIAGNOSTICS.md).
 The confirmed FileConnection class/version motivates the [file mailbox experiment](FILE-MAILBOX.md).
+
+## Native Wi-Fi browser endpoint
+
+The same server now serves a simple HTML 3.2 page at
+`http://COMPUTER_LAN_IP:8765/link`, with an explicit WML fallback at `/link.wml`.
+It requires no Java app or JavaScript. The current computer address is
+192.168.1.97; open `http://192.168.1.97:8765/link` in the phone's native browser.
+
+The page offers a computer-time response at `/link/status` and a GET form at
+`/link/send` that accepts one message of 1–160 characters and echoes it back.
+Messages are recorded in ignored `logs/browser-link-events.jsonl` with private
+file permissions. Request logs also capture Accept and WAP profile headers
+alongside User-Agent to identify actual browser capabilities. These pages
+provide messaging only; received text is never executed as a host command.
+The existing private Java diagnostic endpoint remains available separately.
+
+The implementation was compiled and the server started on the LAN address.
+A live phone page load, genuine native-browser User-Agent and message round
+trip are still pending. If HTML is downloaded instead of rendered, try the
+explicit WML URL. Check the LAN-only firewall rule if neither URL is reachable.

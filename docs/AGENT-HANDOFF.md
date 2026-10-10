@@ -173,3 +173,15 @@ Exterior name remains Powerpack GSTWF-4012; exact chipset/OS still unknown.
 Owner may remove label/photograph board later; do not shift to hardware now.
 USB watcher session 18312 remains active. Other boot-key/cable routes are not
 proven exhausted.
+
+## Current phase — supersedes earlier active/pending state
+
+- Installed app: Mero Files v0.10. Both artifacts passed exact saved-size and full-content readback before installation: JAR 11,457 bytes, JAD 381 bytes. Fresh verified SERIAL command returned matching app_version=0.10 and timeout at open comm:0. No Java serial port opened.
+- Working route: native OBEX file mailbox, E:/Ebook/command.txt to E:/MeroMailbox/response.txt. Incoming acceptance remains manual. Same-ID OPP retries are available. Preserve full readback verification before installation/execution.
+- Java can list E:/System/Java and read this project's installed JAR. Suite IDs change across updates; use full JAR ownership verification before reading only owned installer metadata. Current-suite gfs access failed. Aplix FileConnection package is observed; OS/chipset remain unknown.
+- Native HFP answered service initialization/status commands; identification variants returned ERROR. This is limited AT access, not a shell. HFP channel changed from 4 to 7 after pairing. Interactive console attempts used the stale channel and were refused; the console remains unverified.
+- USB monitoring is stopped. Bluetooth serial experiments are stopped at the owner's request and the host SPP server is closed. Do not resume these routes without new owner direction. Hardware inspection remains deferred.
+- Current direction: native Wi-Fi browser. The Python HTTP server is running on 192.168.1.97:8765; `/link` provides HTML and `/link.wml` WML, computer-time replies and bounded message echo. Request metadata and received messages stay in ignored logs. No phone visit or browser message round trip has yet been confirmed in the current logs.
+- Next concrete action: open http://192.168.1.97:8765/link in the phone's native browser, send a short message and inspect incoming request metadata. Try /link.wml if needed. A prior one-hour LAN-only firewall rule may have expired; check it if the phone cannot reach the server.
+- Owner explicitly requested tracking Serena project configuration and all three Planning with Files files in this milestone. Serena cache/local overrides, build artifacts, raw logs and private device identifiers remain excluded.
+- No OS shell, bootloader version, firmware memory access or loader execution has been established. Exact SN/IMEI remain in ignored private/DEVICE-LABEL.md; never copy them into tracked files.
