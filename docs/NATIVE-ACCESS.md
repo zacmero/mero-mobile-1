@@ -327,3 +327,25 @@ interface to meet the shell goal.
 The phone's white-on-black appearance failed despite the same page displaying
 those colors in Firefox. Leave the appearance alone; this observation does not
 prove every CSS feature or browser scripting feature is absent.
+
+### Sokoban/eBuddy app-bundle research
+
+The owner inspected Games: only Sokoban is present. Java is the only visible
+installation menu. Reported built-in entries include Twitter, eBuddy, MSN,
+Facebook, Yahoo, TV and FM radio; none exposes a version number in the menus
+checked. No exposed native application launcher has been found.
+
+Searches for Sokoban/eBuddy together and in combination with Spreadtrum/Mocor
+provided no reliable exact-device or firmware match. The web-search tool failed;
+Bing RSS returned irrelevant results, Google returned its JavaScript access
+page, DuckDuckGo challenged automated access, and GitHub issue searches for the
+combinations returned no matches. These failures do not prove such firmware
+sources are absent. Do not infer an exact OS from a familiar game or service
+name, or infer that each service icon is a native installed application.
+
+Current best hypothesis remains **Spreadtrum Mocor-family feature-phone
+firmware**, using the directly observed Dorado browser and sprd_com3/Spreadtrum
+profile clues together with Matomo's published classification rule. The exact
+OS kernel, chipset and firmware build remain unconfirmed. A shell has not been
+identified. The absence of an exposed native installer weakens the proposed
+MRP-launcher route; do not assume MRP support or package compatibility.

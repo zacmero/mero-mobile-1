@@ -18,3 +18,13 @@ owner-reported designation. N2322 is now visually corroborated.
 The next identifying step is to open Multimedia > Games and inspect its entries
 and any download/install/options screen. A built-in Games entry alone does not
 prove downloadable native code, Mythroad/MRP, a native SDK or shell access.
+
+## Owner clarification after submenu inspection
+
+Games contains only **Sokoban**. The owner reports Java is the only visible
+installation menu; there is no separate native launcher/install/download menu.
+Other reported entries include Twitter, eBuddy, MSN, Facebook, Yahoo, TV and
+FM radio, with no visible application version numbers. These are owner-reported
+menu names, not a verified inventory of native executable binaries. Whether
+social-service entries invoke web pages or embedded clients remains unknown.
+No Mythroad/MRP launcher support is demonstrated.

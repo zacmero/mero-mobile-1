@@ -68,3 +68,5 @@ implementation is deployed; no genuine phone callbacks have yet been captured.
 The owner reports no firmware/About screen after searching the menus. Native FTP root lists 11 entries, rejects parent navigation and exposes no new firmware tree in the tested view. No Device ID modalias or cached Device ID service is reported. Native MRP runtime support is an unconfirmed candidate to investigate; no native payload has been built or executed.
 
 Owner photos confirm exact label 4-GSTWF-4012 and Model:N2322. Multimedia > Games exists, but the submenu is not pictured and native/MRP support remains unconfirmed. Standby date 01.01.2011 is not firmware-build evidence. No chipset marking appears in these photos.
+
+Owner checked Games: Sokoban only. Java is the only visible installer; no separate native launcher. Reported Twitter/eBuddy/MSN/Facebook/Yahoo/TV/FM entries have no visible version numbers. Native-versus-web implementation of those service entries is unknown. App-bundle searches found no reliable exact firmware match; Mocor-family inference remains based on actual browser/vendor clues, not Sokoban alone. Exact kernel and shell availability are unknown.

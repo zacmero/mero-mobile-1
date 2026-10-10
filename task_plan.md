@@ -26,7 +26,8 @@ Goal: make this phone useful to the computer through a verified two-way link and
 - [x] Attempt a full TCP check; stop incomplete when progress is slow and phone latency rises. Do not claim every port closed.
 - [x] Check for firmware/About UI; owner searched all menus and reports none.
 - [x] Probe native FTP root/parent metadata; parent rejected, no firmware tree exposed.
-- [ ] Identify support for a native application runtime, such as MRP, before choosing a native package.
+- [x] Inspect Games/native installation UI: owner confirms Sokoban only and Java-only installer. No native launcher/MRP support demonstrated.
+- [ ] Identify a documented native diagnostic, firmware-retrieval or execution route for the inferred Mocor platform.
 - [ ] Obtain native OS/shell access, if a supported route can be identified.
 
 The native-browser message reached the direct port-80 server. Earlier failures used 197 instead of 192, according to the owner. Do not restart USB monitoring or Bluetooth serial retries without new owner direction. Board inspection is deferred.

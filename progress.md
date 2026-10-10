@@ -91,3 +91,5 @@ Research found Mythroad native-app SDK sources as a possible additional route;
 phone runtime support is unconfirmed. Visual adjustments remain stopped.
 
 Inspected all four new owner photos. Transcribed the visible menus and non-sensitive label fields in docs/MENU-PHOTOS.md. Corrected exact commercial label to 4-GSTWF-4012 and visually corroborated N2322. Requested the submenu after pressing OK on Multimedia > Games; current photos stop one level above it. Originals, SN and IMEI remain outside tracked documentation.
+
+Owner confirmed Sokoban is the only game and Java is the only visible installer. Recorded social/media menu inventory. Searched Sokoban/eBuddy/Spreadtrum/Mocor combinations through web and fallback endpoints; no reliable exact-model firmware source found. Recorded provider failures and kept Mocor classification as a hypothesis. No native runtime compatibility or shell was established.

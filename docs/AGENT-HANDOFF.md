@@ -264,3 +264,14 @@ label photo containing SN/IMEI. No chipset is visible. Clock date 01.01.2011
 must not be treated as a firmware build. Multimedia > Games is highlighted but
 not opened. Requested the next submenu photo via RX and the user question tool.
 Native application runtime support remains unconfirmed.
+
+## Latest Games/app inventory clarification
+
+Owner opened Games: only Sokoban. Java is the only visible installer. No native
+launcher, chipset or version info is exposed. Twitter/eBuddy/MSN/Facebook/Yahoo/
+TV/FM are menu entries without visible versions; their native-versus-web nature
+is unknown. Do not request the Games submenu again or assume MRP compatibility.
+App-bundle searches yielded no reliable exact-firmware match. Strongest current
+OS hypothesis is Mocor-family based on Dorado, Spreadtrum profile and native
+sprd service clues plus Matomo's OS classifier; exact kernel/chipset/build and
+shell availability remain unconfirmed. See NATIVE-ACCESS.md research limits.
