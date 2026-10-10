@@ -24,10 +24,11 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     private String result = "startup";
     private int sequence;
     private String commandStatus = "not checked";
+    private String inboxStatus = "not checked";
 
     protected void startApp() {
         if (roots == null) {
-            roots = new List("MERO FILES v0.3 - storage", List.IMPLICIT);
+            roots = new List("MERO FILES v0.4 - storage", List.IMPLICIT);
             roots.addCommand(exit);
             roots.setCommandListener(this);
             try {
@@ -49,7 +50,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private void show(String message) {
-        status = new Form("MERO FILES v0.3");
+        status = new Form("MERO FILES v0.4");
         status.append(message);
         status.addCommand(exit);
         status.setCommandListener(this);
@@ -71,7 +72,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
                 stage = "read command";
                 String previousStatus = commandStatus;
                 String message = readCommand();
-                commandStatus = message == null ? "file missing or oversized" : "read " + message.length() + " chars; protocol=" + field(message, "protocol") + "; end=" + message.endsWith("end=1\n");
+                commandStatus = message == null ? inboxStatus : "read " + message.length() + " chars; protocol=" + field(message, "protocol") + "; end=" + message.endsWith("end=1\n");
                 if (message != null && field(message, "protocol").equals("mero-files/1")
                         && message.endsWith("end=1\n")) {
                     String id = field(message, "id");
@@ -97,10 +98,17 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private String readCommand() throws Exception {
-        FileConnection file = (FileConnection) Connector.open(directory.substring(0, directory.length() - "MeroMailbox/".length()) + "Ebook/command.txt", Connector.READ);
+        FileConnection file = (FileConnection) Connector.open(directory.substring(0, directory.length() - "MeroMailbox/".length()) + "Ebook/command.txt");
         try {
-            if (!file.exists()) return null;
-            if (file.fileSize() > 4096) return null;
+            if (!file.exists()) {
+                FileConnection parent = (FileConnection) Connector.open(directory.substring(0, directory.length() - "MeroMailbox/".length()) + "Ebook/");
+                try { inboxStatus = "command missing; parent_exists=" + parent.exists() + "; url=" + file.getURL(); }
+                finally { parent.close(); }
+                return null;
+            }
+            long size = file.fileSize();
+            inboxStatus = "command exists; bytes=" + size + "; url=" + file.getURL();
+            if (size > 4096) return null;
             InputStream input = file.openInputStream();
             try {
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -129,7 +137,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
         Runtime vm = Runtime.getRuntime();
         sequence++;
         return "protocol=mero-files/1\nseq=" + sequence + "\nack=" + ack + "\nresult=" + result
-            + "\ncommand_status=" + commandStatus + "\nmailbox=" + directory + "\nconfig=" + property("microedition.configuration")
+            + "\ninbox_status=" + inboxStatus + "\ncommand_status=" + commandStatus + "\nmailbox=" + directory + "\nconfig=" + property("microedition.configuration")
             + "\nprofiles=" + property("microedition.profiles") + "\nplatform=" + property("microedition.platform")
             + "\nlocale=" + property("microedition.locale") + "\nheap_free=" + vm.freeMemory()
             + "\nheap_total=" + vm.totalMemory() + "\ncolors=" + Display.getDisplay(this).numColors()

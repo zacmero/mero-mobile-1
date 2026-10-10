@@ -73,3 +73,13 @@ v0.3 adds command_status diagnostics and was fully readback-verified in Bt
 (4,422-byte JAR, 342-byte JAD). Owner was asked to install/select E:/.
 Use measured FTP channel 5 / OPP channel 1 to bypass intermittent SDP failures:
 sender/verifier --channel; mailbox --ftp-channel / --opp-channel.
+
+## v0.4 delivery
+
+v0.3 reported file missing or oversized, confirmed by automated seq=2 response.
+The 64-byte command in Ebook still matched original full contents. v0.4 adds
+inbox_status (exact URL, missing file vs size, parent existence), changes the
+inbox connection to default READ_WRITE as a compatibility experiment. The
+4,586-byte JAR and 342-byte JAD were fully verified before installation was
+requested. Wait for owner to launch v0.4/select E:/, then read via FTP channel 5.
+Two-way PING remains unconfirmed; do not treat readiness as an acknowledgement.

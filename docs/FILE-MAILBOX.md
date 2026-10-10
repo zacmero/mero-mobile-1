@@ -168,3 +168,27 @@ Launch and command_status readback remain pending. PING/PONG is unconfirmed.
 Example using this handset's measured service channels:
 
     rtk proxy python scripts/file-mailbox.py PHONE_ADDRESS --ftp-channel 5 --opp-channel 1 --command PING
+
+## v0.3 result and v0.4 inbox probe
+
+The owner launched v0.3 and reported file missing or oversized. The host
+retrieved seq=2, ack=none, result=startup, command_status=file missing or
+oversized, heap_free=1517412, and the same mailbox/runtime properties as
+previous snapshots. The saved 64-byte Ebook/command.txt again passed exact
+size and full-content readback, so Bluetooth-side corruption was not observed.
+The combined status did not distinguish Java exists() from its size check.
+
+v0.4 separates those checks, reporting inbox_status with the FileConnection
+URL, parent-folder existence if the file is missing, and size if it exists.
+It also uses the default read/write connection mode instead of explicit READ,
+a compatibility experiment based on the working response-file route. This
+change is not yet proof of a fix.
+
+Both update artifacts passed full readback before installation was requested:
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| MeroFiles.jar | 4,586 | 1b53ba3a58eb7b984360859e78e4aa35de71494f55ca9273708ddc67e47da7a7 |
+| MeroFiles.jad | 342 | 780773bee82d400000669a46bad2aceb8adb51f56aa0fa11d120b2329ead34f6 |
+
+v0.4 launch/readback and PING/PONG remain pending.
