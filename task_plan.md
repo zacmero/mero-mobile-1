@@ -18,11 +18,11 @@ Goal: make this phone useful to the computer through a verified two-way link and
 
 ## Current phase
 
-- [ ] Open http://192.168.1.97:8765/link in the phone's native Wi-Fi browser and capture its real request metadata.
-- [ ] Confirm a phone message and computer response; try /link.wml if HTML is unsupported.
-- [ ] Use measured browser capabilities to choose the next useful software integration.
+- [x] Open the LAN page in the native Wi-Fi browser and capture its real request metadata; direct port 80 succeeded.
+- [x] Confirm a phone message and an HTTP 200 computer response.
+- [ ] Build a browser-compatible computer dashboard and bounded two-way message inbox; establish manual refresh before adding any automatic polling.
 - [ ] Obtain native OS/shell access, if a supported route can be identified.
 
-The browser server is running, but a live phone round trip is not yet confirmed. Do not restart USB monitoring or Bluetooth serial retries without new owner direction. Board inspection is deferred.
+The native-browser message reached the direct port-80 server. Earlier failures used 197 instead of 192, according to the owner. Do not restart USB monitoring or Bluetooth serial retries without new owner direction. Board inspection is deferred.
 
 Constraints: prefix shell commands with RTK; keep device identifiers, endpoint tokens and raw logs private; never execute a delivered artifact before exact-size and full-content verification. No firmware writes or loader execution have been performed.

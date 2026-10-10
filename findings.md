@@ -6,7 +6,7 @@
 - Owner-confirmed Java configuration: CLDC1.1, MIDP-2.0, j2me, zh-CN. Heap total 2,486,656 bytes is Java heap, not physical RAM.
 - FileConnection uses jp.co.aplix.cldc.io.file.FileConnectionImp. JSR-75 file access works; E:/ is the only demonstrated filesystem root.
 - Java cannot load javax.bluetooth.LocalDevice. Java HTTP failed at response status; TCP failed at socket opening. Observed Java network accounts offer SIM/CMCC WAP/MMS, with no WLAN choice observed.
-- The owner reports working internet access in the native Wi-Fi browser and an earlier LAN download. No genuine native-browser request metadata or message round trip has yet been captured.
+- The owner reports working internet access in the native Wi-Fi browser and an earlier LAN download. A genuine native-browser message and request metadata have now been captured; see the confirmed connection below.
 
 ## Proven computer access
 
@@ -28,4 +28,17 @@
 
 - Mero Files v0.10 is installed. Verified JAR: 11,457 bytes; JAD: 381 bytes. A fresh fully verified SERIAL command received a matching timeout response at open comm:0.
 - The LAN server now provides simple HTML 3.2 and WML pages at /link and /link.wml, computer-time replies and bounded message echo. Request metadata includes User-Agent, Accept and WAP profile headers; received messages remain in ignored private logs.
-- Browser integration has been implemented and started on 192.168.1.97:8765. Phone-side verification is pending; browser messaging does not provide native shell access.
+- Browser integration has been implemented and started on 192.168.1.97:8765. A real phone message has now been received through the direct port-80 server; browser messaging does not provide native shell access.
+
+## Confirmed native-browser connection
+
+A real phone request from 192.168.1.77 reached the direct port-80 server. The
+message was received and the server returned HTTP 200. The owner reported
+entering 197 instead of 192 in earlier attempts; those timeouts do not establish
+that the browser blocks custom ports or that Java's networking issue is resolved.
+
+User-Agent: Dorado WAP-Browser/1.0.0. The phone supplied WAP profile URL
+http://www.spreadtrum.com/wap/6600L_DORADO_UAProfile.xml. This is a firmware/browser
+clue, not proof of the exact chipset or native OS. HTTP and HTTPS retrieval attempts failed because the hostname did not
+resolve on this computer; the profile contents remain unavailable. Accept includes WML, XHTML, HTML and several image types; actual
+rendering support beyond the demonstrated page remains to be measured.

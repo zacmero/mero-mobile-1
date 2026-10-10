@@ -31,3 +31,19 @@ The preceding entries are historical. Current state supersedes their pending-del
 - Added a restricted interactive native AT console; live console attempts on the previously observed HFP channel were refused. Later discovery reported a changed HFP channel. The console remains unverified.
 - Owner stopped the Bluetooth serial route. Closed the host SPP listener and switched to the native Wi-Fi browser. Added HTML/WML pages, computer-time replies, bounded message echo and request-header capture to the LAN server; compiled and started it on 192.168.1.97:8765. A live phone visit remains pending.
 - Owner requested committing the entire current phase, explicitly including Serena configuration and all planning files. Updated findings, plan and handoff for that snapshot; commit/push result will be reported after Git completes.
+
+## Native-browser message confirmed
+
+The owner sent a message through http://192.168.1.97/link. The computer recorded
+it from the phone's confirmed IP 192.168.1.77 and returned HTTP 200. The owner
+explained that earlier requests used 197 instead of 192. Do not attribute those
+timeouts to custom-port incompatibility. Real browser metadata identifies
+Dorado WAP-Browser/1.0.0 and a Spreadtrum 6600L_DORADO UA profile URL; exact
+chipset/OS remain unknown.
+
+The server now runs directly on port 80 as transient systemd unit
+mero-phone-page.service, under zacmero with CAP_NET_BIND_SERVICE. A one-hour
+firewall rule permits port 80 from the phone's IP only. The previous port-80
+forwarding rule was removed. The port-8765 server remains running separately.
+
+Documented the confirmed browser milestone and reproducible port-80 service/firewall commands. Attempts to retrieve the reported Spreadtrum UA profile failed at hostname resolution; chipset identity remains unconfirmed. The next useful deliverable is a browser-compatible computer dashboard and bounded two-way message inbox, using explicit refresh before assuming automatic polling support.

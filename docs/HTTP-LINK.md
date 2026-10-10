@@ -1,6 +1,6 @@
 # HTTP diagnostic connection
 
-Current direction: use the native Wi-Fi browser through the HTML/WML endpoint below. Java networking attempts remain unsuccessful. Earlier browser reachability was owner-reported; current request logs have not confirmed a native-browser round trip.
+Current working route: the native Wi-Fi browser at http://192.168.1.97/link. A real phone message was received and the server returned HTTP 200. Java networking attempts remain unsuccessful. Earlier experiment sections below are historical; see the confirmed native-browser delivery section for current operation.
 
 Mero HTTP sends bounded diagnostic snapshots to this computer over LAN HTTP and receives small diagnostic commands in each response. The v0.1 handset attempt produced `java.io.IOException` without a received diagnostic snapshot. The phone browser could download the LAN server response, establishing browser reachability. v0.2 failed on the handset at `response status` with `java.io.IOException`. The observed Java connection settings offer SIM profiles (CMCC WAP/MMS), with no WLAN choice observed. v0.3 adds a direct TCP HTTP request to test whether the Java HTTP proxy layer is involved; a handset command round trip remains unconfirmed.
 
@@ -92,6 +92,44 @@ provide messaging only; received text is never executed as a host command.
 The existing private Java diagnostic endpoint remains available separately.
 
 The implementation was compiled and the server started on the LAN address.
-A live phone page load, genuine native-browser User-Agent and message round
-trip are still pending. If HTML is downloaded instead of rendered, try the
+At initial startup, the live phone page load, browser identification and
+message round trip were pending; these were subsequently confirmed below. If HTML is downloaded instead of rendered, try the
 explicit WML URL. Check the LAN-only firewall rule if neither URL is reachable.
+
+## Confirmed native-browser delivery
+
+A genuine phone message reached the computer through
+http://192.168.1.97/link and received HTTP 200. The owner reported using 197
+instead of 192 during earlier failed requests. Custom-port rejection was not
+established, and this success does not resolve Java's separate network failure.
+
+The page now runs directly on port 80 in transient systemd service
+mero-phone-page.service, as zacmero with CAP_NET_BIND_SERVICE. Firewall access
+is temporarily limited to the phone's IP, 192.168.1.77. That address may change
+on reconnect, and the one-hour rule will expire. The earlier port-forward rule
+has been removed. The original diagnostic process on port 8765 is separate.
+
+Captured browser: Dorado WAP-Browser/1.0.0. WAP profile header:
+http://www.spreadtrum.com/wap/6600L_DORADO_UAProfile.xml. This is a browser/firmware
+clue; the exact SoC and native OS are not identified by this header alone.
+
+### Reproduce the current port-80 server
+
+Use the current computer LAN address and the phone's actual Wi-Fi IP. The
+service is transient: it does not survive a reboot. The firewall rule below
+expires after one hour. The original port-8765 process is not required for the
+browser page.
+
+```sh
+rtk proxy systemd-run --unit=mero-phone-page --property=User=zacmero --property=AmbientCapabilities=CAP_NET_BIND_SERVICE --property=NoNewPrivileges=yes --working-directory=/home/zacmero/projects/mero-mobile-1 /usr/bin/python /home/zacmero/projects/mero-mobile-1/scripts/http-diagnostics.py --bind 192.168.1.97 --port 80
+rtk proxy firewall-cmd --zone=public --add-rich-rule='rule family="ipv4" source address="192.168.1.77/32" port port="80" protocol="tcp" accept' --timeout=3600
+```
+
+Starting the transient service requires desktop administrative authorization.
+If the service already exists and is active, reuse it. Verify receipt through
+ignored logs/browser-link-events.jsonl and logs/http-requests.jsonl. To stop
+this service, run `rtk proxy systemctl stop mero-phone-page.service`.
+
+Both HTTP and HTTPS attempts to retrieve the reported Spreadtrum UA profile
+failed with hostname resolution errors on this computer. The header is observed
+evidence; the profile contents remain unavailable.

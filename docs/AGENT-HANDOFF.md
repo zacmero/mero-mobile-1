@@ -185,3 +185,18 @@ proven exhausted.
 - Next concrete action: open http://192.168.1.97:8765/link in the phone's native browser, send a short message and inspect incoming request metadata. Try /link.wml if needed. A prior one-hour LAN-only firewall rule may have expired; check it if the phone cannot reach the server.
 - Owner explicitly requested tracking Serena project configuration and all three Planning with Files files in this milestone. Serena cache/local overrides, build artifacts, raw logs and private device identifiers remain excluded.
 - No OS shell, bootloader version, firmware memory access or loader execution has been established. Exact SN/IMEI remain in ignored private/DEVICE-LABEL.md; never copy them into tracked files.
+
+## Latest: native Wi-Fi browser confirmed
+
+A real message reached the computer from phone IP 192.168.1.77 via
+http://192.168.1.97/link; HTTP status was 200. The owner reported entering 197
+instead of 192 during earlier failures. Do not claim a browser custom-port
+restriction or that Java's networking issue is resolved.
+
+Current native-browser User-Agent is Dorado WAP-Browser/1.0.0, with WAP profile
+http://www.spreadtrum.com/wap/6600L_DORADO_UAProfile.xml. This is a useful vendor
+clue, not a demonstrated SoC or OS identity. Profile retrieval is pending.
+Direct port-80 server is transient systemd unit mero-phone-page.service; it runs
+as zacmero with CAP_NET_BIND_SERVICE. Its phone-IP-only firewall rule expires
+after one hour. Previous port-80 redirect was removed. Port-8765 server remains
+separate. Private browser message/request logs are ignored. No shell obtained.
