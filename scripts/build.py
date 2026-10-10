@@ -57,14 +57,15 @@ subprocess.run([args.java, '-jar', str(CACHE / 'ecj.jar'), '-source', '1.3', '-t
                 '-bootclasspath', ':'.join(apis), '-d', str(classes)] + sources, check=True)
 name = {'hello': 'Mero Hello', 'link': 'Mero Link', 'http': 'Mero HTTP'}[args.app]
 profile = 'MIDP-1.0' if args.app == 'hello' else 'MIDP-2.0'
-version = '0.2.0' if args.app == 'http' else '0.1.0'
+version = '0.3.0' if args.app == 'http' else '0.1.0'
 manifest = ('Manifest-Version: 1.0\r\nMIDlet-Name: ' + name + '\r\nMIDlet-Version: ' + version + '\r\n'
             'MIDlet-Vendor: Mero Lab\r\nMIDlet-1: ' + name + ', , ' + app + '\r\n'
             'MicroEdition-Configuration: CLDC-1.0\r\nMicroEdition-Profile: ' + profile + '\r\n')
 if args.app == 'link':
     manifest += 'MIDlet-Permissions-Opt: javax.microedition.io.Connector.bluetooth.server\r\n'
 if args.app == 'http':
-    manifest += 'MIDlet-Permissions-Opt: javax.microedition.io.Connector.http\r\n'
+    manifest += ('MIDlet-Permissions-Opt: javax.microedition.io.Connector.http,\r\n'
+                 ' javax.microedition.io.Connector.socket\r\n')
 unverified = build / (app + '-unverified.jar')
 output = build / (app + '.jar')
 with zipfile.ZipFile(unverified, 'w', zipfile.ZIP_DEFLATED) as jar:
@@ -76,7 +77,7 @@ for api in apis:
     command.extend(['-libraryjars', api])
 subprocess.run(command + ['-dontshrink', '-dontoptimize', '-dontobfuscate', '-microedition', '-target', '1.1'], check=True)
 size = output.stat().st_size
-jad = manifest.replace('Manifest-Version: 1.0\r\n', '') + 'MIDlet-Jar-URL: ' + app + '.jar\r\nMIDlet-Jar-Size: ' + str(size) + '\r\n'
+jad = manifest.replace('Manifest-Version: 1.0\r\n', '').replace('\r\n ', '') + 'MIDlet-Jar-URL: ' + app + '.jar\r\nMIDlet-Jar-Size: ' + str(size) + '\r\n'
 descriptor = build / (app + '.jad')
 descriptor.write_bytes(jad.encode('ascii'))
 print('Built:', output, '(' + str(size) + ' bytes)', 'and', descriptor.name, '(' + str(descriptor.stat().st_size) + ' bytes)')

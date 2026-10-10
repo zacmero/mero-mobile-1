@@ -1,6 +1,6 @@
 # HTTP diagnostic connection
 
-Mero HTTP sends bounded diagnostic snapshots to this computer over LAN HTTP and receives small diagnostic commands in each response. The v0.1 handset attempt produced `java.io.IOException` without a received diagnostic snapshot. The phone browser could download the LAN server response, establishing browser reachability. v0.2 adds GET transport and error-stage reporting; its handset test and a real command round trip are pending.
+Mero HTTP sends bounded diagnostic snapshots to this computer over LAN HTTP and receives small diagnostic commands in each response. The v0.1 handset attempt produced `java.io.IOException` without a received diagnostic snapshot. The phone browser could download the LAN server response, establishing browser reachability. v0.2 failed on the handset at `response status` with `java.io.IOException`. The observed Java connection settings offer SIM profiles (CMCC WAP/MMS), with no WLAN choice observed. v0.3 adds a direct TCP HTTP request to test whether the Java HTTP proxy layer is involved; a handset command round trip remains unconfirmed.
 
 ## Start the computer server
 
@@ -22,7 +22,7 @@ With the server settings created and a Java runtime available:
     rtk proxy python scripts/send-bluetooth.py PHONE_ADDRESS build/MeroHTTP.jar build/MeroHTTP.jad
     rtk proxy python scripts/verify-bluetooth.py PHONE_ADDRESS --folder Bt build/MeroHTTP.jar build/MeroHTTP.jad
 
-The build generates an ignored `HTTPSettings.java` from the private URL. No address typing is needed on the phone. The app targets CLDC 1.0 / MIDP 2.0, uses legacy bytecode and CLDC preverification, and requests optional HTTP permission. It does not use the missing Java Bluetooth API.
+The build generates an ignored `HTTPSettings.java` from the private URL. No address typing is needed on the phone. The app targets CLDC 1.0 / MIDP 2.0, uses legacy bytecode and CLDC preverification, and requests optional HTTP and socket permissions. It does not use the missing Java Bluetooth API.
 
 Before installation/launch, require a passing exact-size and full-content Bluetooth readback. OBEX completion alone is insufficient. A rebuild or endpoint change requires transferring and verifying the new artifacts again.
 
@@ -44,7 +44,7 @@ The v0.2 update also passed full readback verification:
 
 Install Mero HTTP from the verified files and launch it. Allow network access and select Wi-Fi if the phone offers a connection choice. Internet access in the built-in browser does not establish that Java uses Wi-Fi.
 
-The app uploads every two seconds plus request duration while active. v0.2 defaults to GET and offers a `GET / POST` command to switch transport. It displays the failing stage (preparing diagnostics, opening a connection, request headers, output body, response status or response reading). The title `MERO HTTP v0.2` distinguishes it from the earlier install. Stop closes the current HTTP connection; Connect restarts a stopped worker; Exit stops the app. Background pause suppresses requests until resume. `Key` is the last keypad code, not part of an exception.
+The app uploads every two seconds plus request duration while active. v0.3 defaults to TCP and offers a `GET / POST / TCP` command to switch transport. TCP sends a bounded HTTP/1.0 request directly to the same LAN server; it still requires a working Java network bearer. The Details screen shows diagnostics locally even when networking fails. It displays the failing stage (preparing diagnostics, opening a connection, request headers, output body, response status or response reading). The title `MERO HTTP v0.3` distinguishes it from the earlier install. Stop closes the current HTTP or TCP connection; Connect restarts a stopped worker; Exit stops the app. Background pause suppresses requests until resume. `Key` is the last keypad code, not part of an exception.
 
 Each snapshot includes configuration/profile/platform/locale, Java heap, Canvas dimensions/color count, last key code, JSR-75/135/82 class-presence results, filesystem/media version properties and command acknowledgement. Class presence does not prove full feature functionality; heap is not physical RAM; Canvas size may exclude system UI areas.
 
@@ -59,3 +59,14 @@ The agent can read `logs/http-latest.json` directly. A matching command ID and `
 ## Host validation
 
 Local checks passed for server readiness, invalid-endpoint rejection, malformed/duplicate-field rejection, valid POST/GET diagnostic storage, queued PING delivery and acknowledgement storage. Additional checks confirmed HTML health responses, rejected GET logging and omission of the private URL token from request records. Synthetic diagnostic snapshots were cleared before the handset experiment. This validates the host protocol only; actual Java phone communication remains unconfirmed.
+
+## Verified v0.3 update
+
+The JAD initially failed to transfer; resending succeeded. Both saved files then passed exact-size and full-content Bluetooth readback before requesting installation.
+
+| File | Bytes | Readback SHA-256 |
+| --- | --- | --- |
+| `MeroHTTP.jar` | 7,761 | `16cee52d694733968d1114cefbea8201bc2d543ed0a22b2a2f0bb734e7fac480` |
+| `MeroHTTP.jad` | 329 | `28fb8c08612f66bb4981a4b8297ae79942dcf9b132c05847b9dead42483f2b05` |
+
+A host TCP request matching the new transport received HTTP 200 and a diagnostic command. Packaging checks confirmed socket permission in the manifest and descriptor. These checks do not establish handset socket support or Wi-Fi routing. No handset request was present in the server logs at delivery; v0.3 handset testing is pending.

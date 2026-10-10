@@ -3,12 +3,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
+import javax.microedition.io.StreamConnection;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Form;
 import javax.microedition.midlet.MIDlet;
 
 public final class MeroHTTP extends MIDlet implements CommandListener, Runnable {
@@ -17,11 +19,12 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
     private volatile boolean stopping;
     private volatile boolean paused;
     private volatile boolean running;
-    private volatile boolean usePost;
+    private volatile int transport = 2;
     private boolean restartRequested;
     private String requestMethod = "GET";
     private String stage = "startup";
     private volatile HttpConnection connection;
+    private volatile StreamConnection socketConnection;
     private volatile int lastKey;
     private int sequence;
     private String ack = "none";
@@ -29,7 +32,9 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
     private Command connect = new Command("Connect", Command.SCREEN, 1);
     private Command stop = new Command("Stop", Command.SCREEN, 2);
     private Command exit = new Command("Exit", Command.EXIT, 3);
-    private Command mode = new Command("GET / POST", Command.SCREEN, 4);
+    private Command mode = new Command("GET/POST/TCP", Command.SCREEN, 4);
+    private Command details = new Command("Details", Command.SCREEN, 5);
+    private Command back = new Command("Back", Command.BACK, 1);
 
     protected void startApp() {
         paused = false;
@@ -39,6 +44,7 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
             screen.addCommand(stop);
             screen.addCommand(exit);
             screen.addCommand(mode);
+            screen.addCommand(details);
             screen.setCommandListener(this);
             Display.getDisplay(this).setCurrent(screen);
             startConnection();
@@ -66,6 +72,7 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
                         String response = exchange();
                         String id = field(response, "command_id");
                         String command = field(response, "command");
+                        if (id.length() == 0 || command.length() == 0) throw new java.io.IOException("Invalid server reply");
                         if (id.length() > 0 && !id.equals(ack)) {
                             if (command.equals("PING")) result = "PONG";
                             else if (command.equals("INFO") || command.equals("HEAP") || command.equals("SCREEN")
@@ -78,7 +85,9 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
                         if (!stopping) report(requestMethod + " failed at " + stage + "\n" + error.toString());
                     } finally {
                         try { if (connection != null) connection.close(); } catch (Exception error) { }
+                        try { if (socketConnection != null) socketConnection.close(); } catch (Exception error) { }
                         connection = null;
+                        socketConnection = null;
                     }
                 }
                 try { Thread.sleep(2000); } catch (Exception error) { }
@@ -93,12 +102,14 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
 
     private String exchange() throws Exception {
         stage = "prepare diagnostics";
-        boolean post = usePost;
-        requestMethod = post ? "POST" : "GET";
+        int selected = transport;
+        boolean post = selected == 1;
+        requestMethod = selected == 2 ? "TCP" : post ? "POST" : "GET";
         byte[] bytes = info().getBytes("UTF-8");
+        if (selected == 2) return socketExchange(bytes);
         stage = "open connection";
         String url = post ? HTTPSettings.URL : HTTPSettings.URL + "?data=" + encode(bytes);
-        connection = (HttpConnection) Connector.open(url, Connector.READ_WRITE, true);
+        connection = (HttpConnection) Connector.open(url);
         stage = "request headers";
         connection.setRequestMethod(post ? HttpConnection.POST : HttpConnection.GET);
         if (post) {
@@ -123,6 +134,36 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
             }
         } finally { input.close(); }
         return new String(reply.toByteArray(), "UTF-8");
+    }
+
+    private String socketExchange(byte[] bytes) throws Exception {
+        String url = HTTPSettings.URL.substring(7);
+        int slash = url.indexOf('/');
+        String host = url.substring(0, slash);
+        String path = url.substring(slash) + "?data=" + encode(bytes);
+        stage = "open TCP socket";
+        socketConnection = (StreamConnection) Connector.open("socket://" + host);
+        stage = "write TCP request";
+        OutputStream output = socketConnection.openOutputStream();
+        output.write(("GET " + path + " HTTP/1.0\r\nHost: " + host
+            + "\r\nUser-Agent: MeroHTTP-TCP/0.3\r\nConnection: close\r\n\r\n").getBytes("UTF-8"));
+        output.flush();
+        stage = "read TCP response";
+        InputStream input = socketConnection.openInputStream();
+        ByteArrayOutputStream reply = new ByteArrayOutputStream();
+        try {
+            int c;
+            while ((c = input.read()) != -1) {
+                if (reply.size() >= 8192) throw new java.io.IOException("TCP reply too large");
+                reply.write(c);
+            }
+        } finally { input.close(); output.close(); }
+        String response = new String(reply.toByteArray(), "UTF-8");
+        int headers = response.indexOf("\r\n\r\n");
+        int line = response.indexOf("\r\n");
+        if (headers < 0 || line < 0 || response.substring(0, line).indexOf(" 200 ") < 0)
+            throw new java.io.IOException("Invalid TCP HTTP response");
+        return response.substring(headers + 4);
     }
 
     private String encode(byte[] bytes) {
@@ -183,7 +224,15 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
 
     public void commandAction(Command command, Displayable displayable) {
         if (command == connect) startConnection();
-        else if (command == mode) { usePost = !usePost; report(usePost ? "POST selected" : "GET selected"); startConnection(); }
+        else if (command == mode) { transport = (transport + 1) % 3; report(transport == 2 ? "TCP selected" : transport == 1 ? "POST selected" : "GET selected"); startConnection(); }
+        else if (command == details) {
+            Form form = new Form("Local diagnostics");
+            form.append(info());
+            form.addCommand(back);
+            form.setCommandListener(this);
+            Display.getDisplay(this).setCurrent(form);
+        }
+        else if (command == back) Display.getDisplay(this).setCurrent(screen);
         else if (command == stop) { stopConnection(); report("Stopped"); }
         else if (command == exit) { destroyApp(true); notifyDestroyed(); }
     }
@@ -192,6 +241,7 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
         stopping = true;
         restartRequested = false;
         try { if (connection != null) connection.close(); } catch (Exception error) { }
+        try { if (socketConnection != null) socketConnection.close(); } catch (Exception error) { }
     }
 
     protected void pauseApp() { paused = true; }
@@ -203,7 +253,7 @@ public final class MeroHTTP extends MIDlet implements CommandListener, Runnable 
             g.fillRect(0, 0, getWidth(), getHeight());
             g.setColor(0);
             int h = g.getFont().getHeight();
-            g.drawString("MERO HTTP v0.2", 2, 2, Graphics.TOP | Graphics.LEFT);
+            g.drawString("MERO HTTP v0.3", 2, 2, Graphics.TOP | Graphics.LEFT);
             String text = status;
             int start = 0;
             int row = 1;
