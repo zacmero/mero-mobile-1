@@ -47,3 +47,14 @@ firewall rule permits port 80 from the phone's IP only. The previous port-80
 forwarding rule was removed. The port-8765 server remains running separately.
 
 Documented the confirmed browser milestone and reproducible port-80 service/firewall commands. Attempts to retrieve the reported Spreadtrum UA profile failed at hostname resolution; chipset identity remains unconfirmed. The next useful deliverable is a browser-compatible computer dashboard and bounded two-way message inbox, using explicit refresh before assuming automatic polling support.
+
+## Two-way inbox implementation
+
+Added persistent bounded SQLite messages, computer --message / --inbox commands,
+phone message IDs, follow-up request acknowledgements, HTML meta-refresh and WML
+timer inboxes with manual SYNC fallback. Compose stays separate from polling.
+Preserved the owner's requested sparse, cryptic old-school style. Python source
+compiled; no automated tests were added or run. Queued the first real computer
+message. Deployment restart awaits desktop authentication; the old service still
+returned Not found for /link/inbox. Live automatic refresh and delivery checks
+remain pending.

@@ -133,3 +133,37 @@ this service, run `rtk proxy systemctl stop mero-phone-page.service`.
 Both HTTP and HTTPS attempts to retrieve the reported Spreadtrum UA profile
 failed with hostname resolution errors on this computer. The header is observed
 evidence; the profile contents remain unavailable.
+
+## Two-way browser inbox
+
+Open http://192.168.1.97/link/inbox on the phone. The HTML page requests a
+refresh every two seconds; WML fallback /link/inbox.wml uses a two-second timer.
+Automatic refresh support and actual delivery latency on this phone still need
+live confirmation. SYNC provides manual refresh if the timer is ignored.
+TX opens a separate compose page so refreshes do not erase text being typed.
+Return to RX after sending to receive computer messages.
+
+Send from the computer:
+
+```sh
+rtk proxy python scripts/http-diagnostics.py --message 'CHANNEL OPEN'
+rtk proxy python scripts/http-diagnostics.py --inbox
+```
+
+Each message has an ID. The computer records a delivery acknowledgement only
+when a subsequent phone request carries IDs shown on its previous inbox page.
+This establishes a follow-up request, not proof that a person read the screen.
+Request logs provide timestamps to measure the actual refresh interval. The
+browser pages never execute received text as a host command.
+
+The private SQLite store logs/browser-messages.sqlite3 persists across server
+restarts and retains 100 messages. The phone shows the newest six; --inbox prints
+the newest 20. Messages are limited to 160 characters. Existing private inbound
+JSONL logging remains available. The first pre-inbox message was not migrated
+into this new store. The page uses sparse dark HTML, monospace text and RX/TX
+labels; WML keeps equivalent wording with browser-controlled presentation.
+
+After changing the server script, restart mero-phone-page.service. The service
+runs as zacmero, but Linux requires desktop administrative authentication for
+that system-service restart. Do not mistake an active old process for a deployed
+update: it must serve /link/inbox before requesting the phone-side check.

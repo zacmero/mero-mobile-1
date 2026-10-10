@@ -200,3 +200,18 @@ Direct port-80 server is transient systemd unit mero-phone-page.service; it runs
 as zacmero with CAP_NET_BIND_SERVICE. Its phone-IP-only firewall rule expires
 after one hour. Previous port-80 redirect was removed. Port-8765 server remains
 separate. Private browser message/request logs are ignored. No shell obtained.
+
+## Inbox update awaiting deployment
+
+scripts/http-diagnostics.py now provides /link/inbox, /link/inbox.wml, --message
+and --inbox. Private SQLite history retains 100 messages; the phone displays six.
+Refresh is configured for two seconds, with manual SYNC fallback. Sending a
+message leaves the phone on compose; return to RX for updates. A follow-up
+request acknowledges only the computer IDs included on the previous inbox page.
+The user's desired aesthetic is sparse, dark, monospace and cryptic RX/TX text.
+
+The first computer message is queued. Restart of mero-phone-page.service needs
+Linux desktop authentication; the old process was still serving when checked.
+Deployment and live auto-refresh/acknowledgement remain pending. Do not claim
+fast polling is confirmed before genuine requests and delivery acknowledgements
+appear. No phone JAR/JAD update is needed for this browser feature.
