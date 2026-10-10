@@ -136,3 +136,15 @@ Retry succeeded after owner confirmed visibility. Both files in Bt verified
 byte-for-byte: JAR 5,938 bytes, JAD 342 bytes. Owner was asked to launch v0.6
 and select E:/; keep Bluetooth idle until readiness confirmed. Then retrieve
 expanded metadata via file-mailbox.py --ftp-channel 5 (no command needed).
+
+## Latest measured capabilities
+
+Verified v0.6 launched and its complete inventory was retrieved. See
+CAPABILITY-INVENTORY.md for every field. E:/ storage: total 987480064 bytes,
+available 958971904, used 28508160. CommConnection loads; commports=0.
+Media controls load but capture/recording properties are false. PIM version
+1.0 reported despite PIM class load failure. OS/vendor properties unavailable.
+Host passively connected native RFCOMM channel 3; no unsolicited data in
+eight seconds, zero application bytes sent. No console/shell/protocol identified.
+Do not send guessed native service commands; Java comm port 0 remains an
+unproven candidate, not a demonstrated connection. v0.6 is the current app.

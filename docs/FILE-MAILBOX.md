@@ -333,3 +333,11 @@ files in Bt passed exact-size and full-content readback:
 
 The owner was asked to install/launch v0.6 and select E:/, completing permission
 prompts while host Bluetooth remains idle. Expanded handset inventory is pending.
+
+### v0.6 actual inventory retrieved
+
+Owner confirmed launch. A complete v0.6 snapshot was retrieved with INFO OK
+for the previously saved command. See [every field and its interpretation](CAPABILITY-INVENTORY.md).
+Storage capacity and Java serial/capture/API evidence are now recorded;
+OS/vendor properties remain unavailable. A passive native SPP connection
+succeeded but produced no unsolicited data or shell evidence.

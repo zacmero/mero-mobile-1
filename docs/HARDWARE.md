@@ -160,3 +160,18 @@ response through native Bluetooth FTP and confirmed the exact command ID
 acknowledgement. Native OPP receives commands with manual acceptance. Java
 filesystem read/write is therefore functional; the native OS and shell remain
 unidentified. See [mailbox evidence](FILE-MAILBOX.md) for the complete snapshot.
+
+## Automated capability inventory and passive serial result
+
+Verified v0.6 reports storage root E:/, total 987,480,064 bytes, available
+958,971,904 bytes, used 28,508,160 bytes. Java CommConnection loads and
+microedition.commports=0; no Java serial connection has been attempted.
+Multimedia Manager/VideoControl/RecordControl load, but capture/recording flags
+are false. Generic OS/vendor properties are unavailable. PIM version property
+1.0 conflicts with failure to load its PIM class. Phone clock reports a 2011
+date. See [complete metadata inventory](CAPABILITY-INVENTORY.md).
+
+Native RFCOMM channel 3 (sprd_com3) accepted a host connection. A passive
+eight-second read received no data; zero application bytes were sent. This
+proves service reachability, not a native console, shell, modem protocol,
+specific chipset, or OS.
