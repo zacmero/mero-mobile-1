@@ -129,3 +129,10 @@ and selected-storage capacity counters, cached at startup; clock and heap are
 fresh per response. Built successfully. Two OPP attempts failed Host is down
 before delivery. Await phone Bluetooth on/visible confirmation, resend and
 fully verify before installation. v0.5 remains the proven working app.
+
+## v0.6 now verified
+
+Retry succeeded after owner confirmed visibility. Both files in Bt verified
+byte-for-byte: JAR 5,938 bytes, JAD 342 bytes. Owner was asked to launch v0.6
+and select E:/; keep Bluetooth idle until readiness confirmed. Then retrieve
+expanded metadata via file-mailbox.py --ftp-channel 5 (no command needed).

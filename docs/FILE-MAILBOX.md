@@ -320,3 +320,16 @@ delivery. Artifacts are not yet verified on the phone. Owner was asked to enable
 Bluetooth visibility before resending. Keep verified v0.5 available until the
 v0.6 update passes full saved-file verification. Do not poll Bluetooth while the
 owner launches the new app or completes permission prompts.
+
+### v0.6 verified delivery
+
+After the owner confirmed Bluetooth visibility, another send succeeded. Both
+files in Bt passed exact-size and full-content readback:
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| MeroFiles.jar | 5,938 | 41a39a0cfe9c9311d19405b4f4d5fe5be8e9a102dc2f5d2fed9789f980362118 |
+| MeroFiles.jad | 342 | cfdec032e56a83cffc8e6241e69a2e96903abceadd17da522ccc70d4b8238471 |
+
+The owner was asked to install/launch v0.6 and select E:/, completing permission
+prompts while host Bluetooth remains idle. Expanded handset inventory is pending.
