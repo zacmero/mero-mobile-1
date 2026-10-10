@@ -385,3 +385,15 @@ verified suite present. OPEN file:///E:/System/Java/3.jar succeeded, reported
 Thus the ordinary file API provides the working installer-file route; GFS does
 not provide a working route in this test. This is read access, not native code
 execution or a shell. Future access can use OPEN without another app rebuild.
+
+
+## v0.10 startup and serial timing
+
+At startup the app reads the saved command ID and skips its execution. Send a
+fresh ID after the mailbox is ready. Startup diagnostics can acknowledge that
+saved ID with result=startup; only a matching operation result establishes a
+new command response. SERIAL now waits up to 90 seconds for port opening and
+uses comm:0 without optional flags. For this experiment allow network silence
+through the opening window, for example --permission-wait 100 with --timeout 150.
+Other operations and their bounds are unchanged. Live serial connectivity is
+not yet confirmed.

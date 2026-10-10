@@ -34,7 +34,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
 
     protected void startApp() {
         if (roots == null) {
-            roots = new List("MERO FILES v0.9 - storage", List.IMPLICIT);
+            roots = new List("MERO FILES v0.10 - storage", List.IMPLICIT);
             roots.addCommand(exit);
             roots.setCommandListener(this);
             try {
@@ -56,7 +56,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private void show(String message) {
-        status = new Form("MERO FILES v0.9");
+        status = new Form("MERO FILES v0.10");
         status.append(message);
         status.addCommand(exit);
         status.setCommandListener(this);
@@ -73,6 +73,15 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             } finally { folder.close(); }
             stage = "collect capabilities";
             capabilities = collectCapabilities();
+            stage = "skip saved command";
+            String saved = readCommand();
+            if (saved != null && field(saved, "protocol").equals("mero-files/1") && saved.endsWith("end=1\n")) {
+                String savedId = field(saved, "id");
+                if (savedId.length() > 0 && savedId.length() <= 64) {
+                    ack = savedId;
+                    commandStatus = "skipped saved command; waiting for fresh ID";
+                }
+            }
             stage = "write startup diagnostics";
             writeResponse();
             show("Mailbox ready\n" + directory + "\nReading Ebook/command.txt");
@@ -163,7 +172,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             + "\nheap_total=" + vm.totalMemory() + "\ncolors=" + Display.getDisplay(this).numColors()
             + "\nfileconnection_version=" + property("microedition.io.file.FileConnection.version")
             + "\nmedia_version=" + property("microedition.media.version")
-            + "\napp_version=0.9\nphone_time_ms=" + System.currentTimeMillis()
+            + "\napp_version=0.10\nphone_time_ms=" + System.currentTimeMillis()
             + "\n" + capabilities + serialReport + pathReport + "end=1\n";
     }
 
@@ -258,7 +267,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
         SerialProbe probe = new SerialProbe();
         Thread worker = new Thread(probe);
         worker.start();
-        long deadline = System.currentTimeMillis() + 10000;
+        long deadline = System.currentTimeMillis() + 90000;
         while (!probe.finished && !stopped && System.currentTimeMillis() < deadline) Thread.sleep(100);
         if (!probe.finished) {
             probe.cancelled = true;
@@ -279,7 +288,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             OutputStream output = null;
             StringBuffer data = new StringBuffer("serial_port=0\n");
             try {
-                connection = (CommConnection) Connector.open("comm:0;blocking=off");
+                connection = (CommConnection) Connector.open("comm:0");
                 if (cancelled) return;
                 data.append("serial_baudrate=").append(connection.getBaudRate()).append('\n');
                 stage = "open serial streams";

@@ -217,3 +217,30 @@ A server registration response alone is insufficient: startup also checks the
 Serial Port UUID advertisement because BlueZ can silently fail a channel bind.
 See the [BlueZ ProfileManager API](https://github.com/bluez/bluez/blob/master/doc/org.bluez.ProfileManager.rst)
 and [profile implementation](https://github.com/bluez/bluez/blob/master/src/profile.c).
+
+
+## Fresh pairing and v0.10
+
+The owner removed the old phone-side pairing; the computer also removed its old
+bond and prepared a default pairing agent while SPP channel 22 was advertised.
+Legacy PIN pairing completed, confirmed by Paired=true and Bonded=true; phone
+service discovery also completed. After the owner relaunched v0.9 and accepted
+SERIAL, the startup response reported timeout at open comm:0. The host SPP server
+received no connection. Fresh pairing did not establish Java serial access.
+
+v0.10 increases the Java serial opening deadline from 10 to 90 seconds and tries
+comm:0 without the optional blocking parameter. The longer deadline allows an
+experiment with discovery/selection latency; it is not an established fix.
+Startup now records the saved command ID without executing it, so an app launch
+waits for a fresh command rather than replaying a previous SERIAL request.
+
+v0.10 compiled and its delivered artifacts passed full saved-size and byte
+readback before installation was requested:
+JAR 11,457 bytes, SHA-256
+e6b92bdaf13a02cad7b70811aa677448086ee6574981d73b71b7e57f2dfd6c76;
+JAD 381 bytes, SHA-256
+bec1c93b7be67cd6ca9c980428b67e3d59c381d0b1666135b0623ac6a3aee6e9.
+The host server was renewed on channel 22 with a one-hour bounded lifetime.
+The v0.10 live SERIAL result is pending. Use a fresh command, allow sufficient
+permission/discovery time, and check both the matching mailbox response and host
+server data; accepted commands alone do not prove serial connectivity.
