@@ -28,7 +28,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
 
     protected void startApp() {
         if (roots == null) {
-            roots = new List("MERO FILES v0.4 - storage", List.IMPLICIT);
+            roots = new List("MERO FILES v0.5 - storage", List.IMPLICIT);
             roots.addCommand(exit);
             roots.setCommandListener(this);
             try {
@@ -50,7 +50,7 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
     }
 
     private void show(String message) {
-        status = new Form("MERO FILES v0.4");
+        status = new Form("MERO FILES v0.5");
         status.append(message);
         status.addCommand(exit);
         status.setCommandListener(this);
@@ -108,13 +108,13 @@ public final class MeroFiles extends MIDlet implements CommandListener, Runnable
             }
             long size = file.fileSize();
             inboxStatus = "command exists; bytes=" + size + "; url=" + file.getURL();
-            if (size > 4096) return null;
+            if (size < 0 || size > 4096) return null;
             InputStream input = file.openInputStream();
             try {
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                int c;
-                while ((c = input.read()) != -1) {
-                    if (bytes.size() >= 4096) return null;
+                for (int i = 0; i < (int) size; i++) {
+                    int c = input.read();
+                    if (c == -1) throw new java.io.IOException("Command truncated at byte " + i);
                     bytes.write(c);
                 }
                 return new String(bytes.toByteArray(), "UTF-8");

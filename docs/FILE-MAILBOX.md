@@ -192,3 +192,28 @@ Both update artifacts passed full readback before installation was requested:
 | MeroFiles.jad | 342 | 780773bee82d400000669a46bad2aceb8adb51f56aa0fa11d120b2329ead34f6 |
 
 v0.4 launch/readback and PING/PONG remain pending.
+
+## v0.4 result and v0.5 bounded stream read
+
+The owner launched v0.4. Its automated response reported seq=2, ack=none,
+result=startup, inbox_status and command_status both `command exists; bytes=64;
+url=file:///E:/Ebook/command.txt`, heap_free=1530332. Java now reports the exact
+file URL and size; this does not establish that the connection-mode change
+caused that visibility, since v0.3 combined missing and oversized cases.
+
+Given those values, the current readCommand code can return null only after
+its stream read reaches the 4 KiB safety bound without EOF. This narrows the
+next experiment to stream behavior rather than folder naming or transfer
+corruption. v0.5 reads exactly the reported fileSize bytes, still rejecting
+sizes outside 0..4096 and premature EOF. A nonstandard EOF implementation is
+suspected, not yet independently proven.
+
+The first verification connection returned Host is down; a retry succeeded.
+Both artifacts passed exact size and full-content readback before installation:
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| MeroFiles.jar | 4,628 | d0d8bb93a634a1c97156a1b5630372a2dd7d5735cb597b67358227486cd87759 |
+| MeroFiles.jad | 342 | 05e41a53ef1a5e8e07c2d147889ea8266ced4a3bbf147f7897ceb7846bf5fe93 |
+
+The owner is installing v0.5; command acknowledgement remains pending.

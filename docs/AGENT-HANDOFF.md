@@ -83,3 +83,12 @@ inbox connection to default READ_WRITE as a compatibility experiment. The
 4,586-byte JAR and 342-byte JAD were fully verified before installation was
 requested. Wait for owner to launch v0.4/select E:/, then read via FTP channel 5.
 Two-way PING remains unconfirmed; do not treat readiness as an acknowledgement.
+
+## v0.5 delivery
+
+v0.4 response reports command exists, bytes=64, exact URL E:/Ebook/command.txt
+but ack=none. Source narrows null result to stream bound reached without EOF.
+v0.5 reads exactly fileSize bytes with a 4 KiB bound and premature EOF rejection.
+4,628-byte JAR and 342-byte JAD were fully verified (first connection failed,
+retry passed). Owner says will install now; await readiness and retrieve response.
+Do not claim PONG until its ack matches the verified command ID.
