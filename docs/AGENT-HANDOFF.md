@@ -47,3 +47,10 @@ You are helping with **mero-mobile-1**, a playful hardware archaeology and Java 
 
 ## Starter message for user/agent
 Start RECON-001. Compare USB events before/after plugging the phone in with a known data cable, inspect Java menu details and Local install, then determine how to transfer a tiny MIDlet. Keep an evidence table and teach the Java concepts as we encounter them. Do not guess the OS or promise a shell.
+
+## Current mailbox observation
+
+Owner selected E:/ and reported Mailbox ready. Native OBEX retrieved the Java-written
+MeroMailbox/response.txt startup snapshot; Java storage writes and Bluetooth reads
+are proven. Initial FTP command PutFile timed out; PING acknowledgement is not yet
+proven. See FILE-MAILBOX.md for the full automated snapshot and pending retry.

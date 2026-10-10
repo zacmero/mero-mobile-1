@@ -74,3 +74,41 @@ readback verification before installation was requested:
 | MeroFiles.jad | 342 | 63368a1da155f97ae53e00b865e837095220f6ab93bd363ed3e09619defe695e |
 
 Storage-root selection, actual Java file access, and PING/PONG remain pending.
+
+The owner reports the app launched successfully and lists storage root `E:/`.
+The expected Java mailbox URL after selection is `file:///E:/MeroMailbox/`.
+The first host attempt to enter `MeroMailbox` through OBEX returned `Not Found`;
+root selection and the Mailbox ready screen still need confirmation.
+
+## First actual filesystem result
+
+The owner selected `E:/` and confirmed Mailbox ready. The host then retrieved
+`MeroMailbox/response.txt` through native OBEX FTP. This establishes Java
+filesystem writes and computer-side Bluetooth reads of those files, with the
+OBEX root mapping to the Java `E:/` storage root for this experiment.
+
+The automated startup snapshot contained:
+
+| Field | Value |
+| --- | --- |
+| protocol | mero-files/1 |
+| seq | 1 |
+| ack | none |
+| result | startup |
+| mailbox | file:///E:/MeroMailbox/ |
+| config | CLDC-1.1 |
+| profiles | MIDP-2.0 |
+| platform | j2me |
+| locale | zh-CN |
+| heap_free | 1798148 |
+| heap_total | 2486656 |
+| colors | 65535 |
+| fileconnection_version | 1.0 |
+| media_version | 1.2 |
+| end | 1 |
+
+The first command-file FTP PutFile attempt failed with a transfer error;
+the host OBEX log reported a timeout waiting for response. The retry also failed with a transfer error; the owner was asked whether a
+file/access prompt appeared. This is not yet a
+successful two-way command exchange. Do not confuse the startup response with
+a PING acknowledgement.
