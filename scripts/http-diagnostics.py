@@ -179,11 +179,12 @@ class Handler(BaseHTTPRequestHandler):
         else:
             body = ('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n'
                     '<html><head><title>' + title + '</title></head>'
-                    '<body bgcolor="#050505" text="#b0c2ad" link="#c1d0bc" vlink="#879681"><font face="monospace" size="2">'
+                    '<body bgcolor="#000000" text="#ffffff" link="#ffffff" vlink="#ffffff" alink="#ffffff"><font face="monospace" size="2">'
                     '<h3>' + title + '</h3><p>' + message + '</p><p><a href="/link/status">PING</a></p>'
                     '<p><a href="/link/inbox">RX // live</a></p>'
                     '<form action="/link/send" method="get">TX&gt; '
-                    '<input name="message" maxlength="160"><input type="submit" value="TX"></form>'
+                    '<input name="message" maxlength="160" style="background:#000;color:#fff;border:1px solid #fff">'
+                    '<input type="submit" value="TX" style="background:#000;color:#fff;border:1px solid #fff"></form>'
                     '<p><a href="/link">LINK</a> | <a href="/link.wml">WAP</a></p></font></body></html>\n')
             self.reply(200, body, 'text/html')
 
@@ -211,15 +212,15 @@ class Handler(BaseHTTPRequestHandler):
             body = ('<?xml version="1.0"?>\n'
                     '<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">\n'
                     '<wml><card id="inbox" title="MERO // RX" ontimer="' + escape(target) + '">'
-                    '<timer value="20"/><p>LINK: ONLINE // RX: 2s</p>' + entries
+                    '<timer value="10"/><p>LINK: ONLINE // RX: 1s</p>' + entries
                     + '<p><a href="' + escape(target) + '">SYNC</a> | <a href="/link.wml">TX</a></p>'
                     '</card></wml>\n')
             self.reply(200, body, 'text/vnd.wap.wml')
         else:
             body = ('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n'
-                    '<html><head><title>MERO // RX</title><meta http-equiv="refresh" content="2;url='
-                    + escape(target) + '"></head><body bgcolor="#050505" text="#b0c2ad" link="#c1d0bc" vlink="#879681">'
-                    '<font face="monospace" size="2"><h3>MERO // RX</h3><p>LINK: ONLINE // RX: 2s</p>'
+                    '<html><head><title>MERO // RX</title><meta http-equiv="refresh" content="1;url='
+                    + escape(target) + '"></head><body bgcolor="#000000" text="#ffffff" link="#ffffff" vlink="#ffffff" alink="#ffffff">'
+                    '<font face="monospace" size="2"><h3>MERO // RX</h3><p>LINK: ONLINE // RX: 1s</p>'
                     + entries + '<p><a href="' + escape(target) + '">SYNC</a> | '
                     '<a href="/link">TX</a></p></font></body></html>\n')
             self.reply(200, body, 'text/html')

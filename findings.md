@@ -42,3 +42,13 @@ http://www.spreadtrum.com/wap/6600L_DORADO_UAProfile.xml. This is a firmware/bro
 clue, not proof of the exact chipset or native OS. HTTP and HTTPS retrieval attempts failed because the hostname did not
 resolve on this computer; the profile contents remain unavailable. Accept includes WML, XHTML, HTML and several image types; actual
 rendering support beyond the demonstrated page remains to be measured.
+
+## Automatic two-way inbox confirmed
+
+The native browser acknowledged a queued computer message and sent "hello ghost"
+through TX. A fresh computer reply was acknowledged too. Automatic page requests
+continued without manual refresh: about 3.2 seconds with a two-second delay,
+then about 2.35 seconds after reducing the delay to one second. Computer-message
+follow-up acknowledgement took 5.659 seconds across the update, not a directly
+measured display latency. HTML is now pure white on black with monospace RX/TX
+labels. The exact SoC/OS and any native shell remain unconfirmed.

@@ -137,9 +137,10 @@ evidence; the profile contents remain unavailable.
 ## Two-way browser inbox
 
 Open http://192.168.1.97/link/inbox on the phone. The HTML page requests a
-refresh every two seconds; WML fallback /link/inbox.wml uses a two-second timer.
-Automatic refresh support and actual delivery latency on this phone still need
-live confirmation. SYNC provides manual refresh if the timer is ignored.
+refresh after one second; WML fallback /link/inbox.wml uses a one-second timer.
+Automatic HTML refresh is confirmed on the phone. Initial two-second delay
+produced about 3.2 seconds between requests; reducing the delay produced about
+2.35 seconds between requests. This includes browser and network overhead. SYNC provides manual refresh if the timer is ignored.
 TX opens a separate compose page so refreshes do not erase text being typed.
 Return to RX after sending to receive computer messages.
 
@@ -160,10 +161,21 @@ The private SQLite store logs/browser-messages.sqlite3 persists across server
 restarts and retains 100 messages. The phone shows the newest six; --inbox prints
 the newest 20. Messages are limited to 160 characters. Existing private inbound
 JSONL logging remains available. The first pre-inbox message was not migrated
-into this new store. The page uses sparse dark HTML, monospace text and RX/TX
+into this new store. The page uses pure white text and links on black HTML, monospace text and RX/TX
 labels; WML keeps equivalent wording with browser-controlled presentation.
 
 After changing the server script, restart mero-phone-page.service. The service
 runs as zacmero, but Linux requires desktop administrative authentication for
 that system-service restart. Do not mistake an active old process for a deployed
 update: it must serve /link/inbox before requesting the phone-side check.
+
+### Live two-way confirmation
+
+The phone acknowledged computer message #1 and sent message #2, "hello ghost".
+Computer reply #3 was also acknowledged; queue-to-follow-up acknowledgement was
+5.659 seconds across the server update. That duration is not a measured screen
+rendering time. The phone continued successful automatic requests after the
+restart, with observed gaps about 2.35 seconds using the one-second delay.
+The running update is confirmed; older pending-deployment notes are historical.
+Input fields also request white-on-black styling, which depends on the old
+browser honoring inline CSS. WML presentation remains browser-controlled.

@@ -215,3 +215,21 @@ Linux desktop authentication; the old process was still serving when checked.
 Deployment and live auto-refresh/acknowledgement remain pending. Do not claim
 fast polling is confirmed before genuine requests and delivery acknowledgements
 appear. No phone JAR/JAD update is needed for this browser feature.
+
+## Current: automatic browser inbox is live
+
+The service restart completed. Genuine phone requests acknowledged computer
+message #1, submitted #2 "hello ghost", and acknowledged computer reply #3.
+Automatic refresh is confirmed: initial two-second delay yielded about 3.2-second
+request gaps; the updated one-second delay yields about 2.35 seconds. Reply #3
+queue-to-follow-up acknowledgement was 5.659 seconds across the update, not
+measured display latency. Old pending-deployment statements are historical.
+
+Use http://192.168.1.97/link/inbox on the phone. Keep RX open for incoming
+messages; TX opens compose without automatic refresh, then return to RX.
+Send with scripts/http-diagnostics.py --message and inspect with --inbox, always
+RTK-prefixed. SQLite history is private/ignored. The user's requested styling
+is now pure white text/links on black with monospace and cryptic RX/TX labels.
+HTML body attributes are the fallback; input CSS/WML appearance may depend on
+browser support. Port-80 firewall authorization is still time-limited.
+No native OS shell or exact chipset identity has been obtained.

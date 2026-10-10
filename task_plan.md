@@ -20,8 +20,8 @@ Goal: make this phone useful to the computer through a verified two-way link and
 
 - [x] Open the LAN page in the native Wi-Fi browser and capture its real request metadata; direct port 80 succeeded.
 - [x] Confirm a phone message and an HTTP 200 computer response.
-- [x] Implement a bounded persistent two-way inbox with computer CLI, separate compose page and two-second HTML/WML refresh requests.
-- [ ] Complete the authenticated service restart and confirm genuine phone acknowledgements and observed polling interval.
+- [x] Implement a bounded persistent two-way inbox with computer CLI, separate compose page and one-second HTML/WML refresh requests.
+- [x] Complete the authenticated service restart and confirm genuine phone acknowledgements and automatic polling, about 2.35 seconds between requests.
 - [ ] Obtain native OS/shell access, if a supported route can be identified.
 
 The native-browser message reached the direct port-80 server. Earlier failures used 197 instead of 192, according to the owner. Do not restart USB monitoring or Bluetooth serial retries without new owner direction. Board inspection is deferred.

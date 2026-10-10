@@ -58,3 +58,15 @@ compiled; no automated tests were added or run. Queued the first real computer
 message. Deployment restart awaits desktop authentication; the old service still
 returned Not found for /link/inbox. Live automatic refresh and delivery checks
 remain pending.
+
+## Inbox deployed and live
+
+Desktop authentication completed and the updated port-80 service restarted.
+The phone acknowledged computer message #1, sent #2 "hello ghost", and later
+acknowledged fresh reply #3. Automatic requests initially arrived about every
+3.2 seconds. Changed the refresh delay to one second; successful phone requests
+then arrived about every 2.35 seconds. Updated the requested style to white text
+and links on black, with optional inline CSS for input fields. The measured
+5.659-second reply acknowledgement spans the update and is not screen latency.
+No phone binary update was needed. Source compilation and live phone checks
+were performed; no automated tests were added or run.
