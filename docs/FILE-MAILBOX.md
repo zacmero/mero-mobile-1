@@ -61,3 +61,16 @@ size bounds, the final marker, and command acknowledgement/result. It saves
 the snapshot in ignored logs/file-mailbox-latest.json. Logs may contain private
 storage/runtime details; do not commit them. Override --folder if the Java root
 maps to a different OBEX subtree. No automatic storage-root guessing is done.
+
+## Delivery result
+
+After the owner toggled Bluetooth on both devices, the next computer-to-phone
+transfer succeeded. Both files in Bt passed exact-size and full-content
+readback verification before installation was requested:
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| MeroFiles.jar | 4,182 | eb936a9138b35714c55587e023e03cbb4337e49941e11b599991b090cc420f32 |
+| MeroFiles.jad | 342 | 63368a1da155f97ae53e00b865e837095220f6ab93bd363ed3e09619defe695e |
+
+Storage-root selection, actual Java file access, and PING/PONG remain pending.
