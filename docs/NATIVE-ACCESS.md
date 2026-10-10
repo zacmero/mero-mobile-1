@@ -132,3 +132,23 @@ JAD 380 bytes, SHA-256
 fc3dcf2479624f9cb14a0b9cf7722f5f2cedbf558fd13968d1950bc095328114.
 Installation and PATHS results are pending. Confirm the installed suite number
 still belongs to this app before probing its internal GFS URL.
+
+
+## v0.8 live results
+
+Installation reassigned this app from suite 3 to suite 4. System/Java metadata
+showed no remaining 3.jar; 4.jar was fully read back and matched the verified
+10,704-byte v0.8 original and SHA-256 above. Future probes must not assume stable
+suite numbers across updates.
+
+A fresh 65-byte PATHS command passed full readback and the response matched its
+command ID, app_version=0.8 and result=PATHS DONE. All six file URLs opened using
+jp.co.aplix.cldc.io.file.FileConnectionImp. E:/ reported exists=true and
+directory=true. C:/, D:/, A:/, F:/ and Z:/ reported exists=false. This identifies
+an Aplix package in the Java runtime; it does not identify the chipset or OS.
+
+The old gfs://java/3.jar URL returned javax.microedition.io.ConnectionNotFoundException.
+Because suite 3 was absent, this does not establish how the current suite's GFS
+URL behaves. No internal JAR header was read. The response also retains the serial
+observation: timeout at open comm:0. Automatic command or permission acceptance
+is not evidence of a successful serial connection. No native shell is obtained.
