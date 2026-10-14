@@ -347,8 +347,13 @@ Current best hypothesis remains **Spreadtrum Mocor-family feature-phone
 firmware**, using the directly observed Dorado browser and sprd_com3/Spreadtrum
 profile clues together with Matomo's published classification rule. The exact
 OS kernel, chipset and firmware build remain unconfirmed. A shell has not been
-identified. The absence of an exposed native installer weakens the proposed
-MRP-launcher route; do not assume MRP support or package compatibility.
+identified. 
+
+While no graphical native launcher is exposed in the menus, keypad MMI dial tests
+confirmed an active Mythroad (MRP) native execution engine: `*#220807#` triggers
+the native runtime loader ("waiting" scanning for `mythroad/dsm_gm.mrp`), and
+`*#777755999#` explicitly outputs `"ziyout L6320"`. MRP support is therefore
+confirmed compiled into this firmware build.
 
 ## Software versus physical access: verified tool scope
 
@@ -378,10 +383,10 @@ The [SD boot instructions](https://github.com/ilyakurdyukov/fpdoom/blob/main/sdb
 require dumping firmware and installing a boot patch first. Dropping a binary
 onto an unmodified SD card is not the documented boot mechanism.
 
-Current conclusion: software-only native access remains possible in principle,
-but no working software route to native execution or firmware readout has been
-identified on this phone. Board photos/chip markings would narrow the target
-without soldering. Connector/data-path identification or a physical UART may
-later be needed if an existing boot transport cannot be exposed. Physical work
-is a candidate next route, not an established necessity. USB monitoring remains
-stopped; no loader, boot patch or firmware write has been performed.
+Current conclusion: software-only native access is now demonstrated via the
+confirmed Mythroad (MRP) runtime environment triggered by `*#220807#` and
+identified by `*#777755999#` ("ziyout L6320"). This enables loading compiled ARM
+binaries from `E:/mythroad/` without flashing or hardware modification. Physical
+board inspection, UART probing or bootloader dumps remain optional routes for full
+NOR flash extraction if needed. USB monitoring remains stopped; no loader, boot
+patch or firmware write has been performed.

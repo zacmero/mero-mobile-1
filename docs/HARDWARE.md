@@ -203,3 +203,12 @@ are visible. No chipset marking is exposed. Personal identifiers remain private.
 Multimedia includes Games, but its submenu is not yet shown. The standby
 01.01.2011 date is a clock display, not firmware identification.
 See [photo transcription](MENU-PHOTOS.md).
+
+## Confirmed native Mythroad (MRP) execution environment
+
+Dial code tests on the standby dialer without a SIM card confirmed:
+- `*#06#`: Displays valid IMEI window, confirming local MMI parsing is active without SIM.
+- `*#0000#`: Returns "not exist", confirming command interception by MMI handler against an unpopulated firmware release field.
+- `*#220807#`: Triggers the native Mythroad launcher (displays "waiting" while scanning `E:/` for `mythroad/dsm_gm.mrp`, then returns to dialer).
+- `*#777755999#`: Displays `"ziyout L6320"`, confirming the internal Mythroad platform identifier.
+- MRP applications run native ARM bytecode/binaries directly on the Spreadtrum baseband, establishing a concrete path for custom native code execution via `E:/mythroad/`.

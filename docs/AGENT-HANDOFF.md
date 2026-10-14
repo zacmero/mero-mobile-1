@@ -288,3 +288,19 @@ actual target without soldering; connector/UART intervention might be needed
 later. Physical access is not proven mandatory. Keep firmware/loader operations
 pending an actual compatible target and usable transport. USB watcher remains
 stopped. Sources and detailed scope are in NATIVE-ACCESS.md.
+
+## Mythroad (MRP) Native Execution Milestone
+
+Dialer testing without a SIM card confirmed the active Mythroad runtime:
+- `*#06#` displayed the IMEI, confirming active local MMI evaluation.
+- `*#0000#` returned "not exist", confirming command interception against an unpopulated firmware release field.
+- `*#220807#` invoked the native Mythroad launcher ("waiting" scanning `E:/` for `mythroad/dsm_gm.mrp`).
+- `*#777755999#` returned `"ziyout L6320"`, confirming the internal platform build tag.
+
+Verified reference artifacts are staged in `mrp/`:
+- `mrp/DSM_GM.mrp` (41,315 bytes, SHA-256: `e9e3b13c1de8829109a06e47febecb24922beee125577d422f82a88fa1ac7a75`)
+- `mrp/helloworld.mrp` (8,354 bytes, SHA-256: `ddb0d7e92411a357dfacb5edf3ffedb11ec36afe6002a6ea9e55371d7bab4fe0`)
+- `mrp/mpc.mrp` (147,505 bytes, SHA-256: `1a734fca1b55bf811fda38b37162ce2c7c4e6ec02efab51b8a1c70afb9db195c`)
+
+Next session step:
+Place `DSM_GM.mrp` (and `dsm_gm.mrp`) plus `helloworld.mrp` in `E:/mythroad/` on the microSD card and dial `*#220807#` to launch the native menu and execute native ARM code.

@@ -40,3 +40,48 @@ Avoid factory reset, flash utilities, pin-short tricks, undocumented service cod
 
 ## Integration architecture ideas (for later)
 A tiny display can poll a user-controlled HTTP endpoint over Wi-Fi if Java GCF allows it. A game, photo-viewer, camera experiment or message terminal are all suitable learning projects. None require replacing the vendor OS or connecting Mero Protocol immediately.
+
+## Native execution and the Mythroad (MRP) layer
+
+Keypad discovery (`*#220807#` and `*#777755999#`) confirmed that the underlying platform contains an active Mythroad native runtime alongside the Aplix Java ME VM:
+
+```text
+    +----------------------------------+     +----------------------------------+
+    |         Java MIDlet (.jar)       |     |        Mythroad App (.mrp)       |
+    |   MIDP 2.0 / CLDC 1.1 / JSR-75   |     |   Compiled ANSI C / ARM Binaries |
+    +----------------------------------+     +----------------------------------+
+                     |                                         |
+                     v                                         v
+    +----------------------------------+     +----------------------------------+
+    |      Aplix JBlend Java VM        |     |      Sky-Mobi Mythroad VM        |
+    +----------------------------------+     +----------------------------------+
+                     |                                         |
+                     +--------------------+--------------------+
+                                          |
+                                          v
+    +---------------------------------------------------------------------------+
+    |              Spreadtrum Mocor OS (Monolithic RTOS written in C)           |
+    |         Device Drivers (LCD, Keypad, Audio, Modem, File System, Baseband) |
+    +---------------------------------------------------------------------------+
+                                          |
+                                          v
+    +---------------------------------------------------------------------------+
+    |         Spreadtrum SC6600L SoC (ARM7EJ-S / ARM9 core, NOR Flash, PSRAM)   |
+    +---------------------------------------------------------------------------+
+```
+
+### Architectural Principles
+
+1. **Is the device OS written in C?**  
+   Yes. Spreadtrum Mocor OS is a monolithic real-time operating system (RTOS) written entirely in C (with small ARM assembly bootstrap code). It runs on top of an embedded RTOS kernel (typically Nucleus RTOS or Spreadtrum's own RTOS). Drivers, networking, file systems, and the runtime engines are all native C.
+
+2. **Does this allow running programs in C?**  
+   Yes. Mythroad (`.mrp`) applications are written in standard ANSI C and compiled with an ARM toolchain (such as `arm-none-eabi-gcc` or ARM ADS) into native ARM machine code. The `.mrp` container packages this compiled binary along with assets. Programs interact with hardware and system services via the Sky-Mobi C API (`mrc_` function calls).
+
+3. **Does this grant native shell access?**  
+   - **Built-in OS shell:** No. Mocor OS is not Linux and does not contain a pre-existing Unix shell (like `sh` or `bash`) or a command interpreter.
+   - **Constructed shell:** Yes. Because Mythroad grants arbitrary native ARM execution in C, we can compile a custom C program that acts as a shell:
+     - Reading and writing files anywhere on `E:/` (microSD).
+     - Dereferencing pointers across physical memory addresses, enabling a complete NOR Flash firmware dump directly to SD card without external flasher hardware.
+     - Drawing an interactive monospace terminal on the 320 × 215 display and capturing raw keypad events.
+     - Opening network sockets or serial streams to communicate directly with a host PC.

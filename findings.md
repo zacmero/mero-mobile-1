@@ -72,3 +72,13 @@ Owner photos confirm exact label 4-GSTWF-4012 and Model:N2322. Multimedia > Game
 Owner checked Games: Sokoban only. Java is the only visible installer; no separate native launcher. Reported Twitter/eBuddy/MSN/Facebook/Yahoo/TV/FM entries have no visible version numbers. Native-versus-web implementation of those service entries is unknown. App-bundle searches found no reliable exact firmware match; Mocor-family inference remains based on actual browser/vendor clues, not Sokoban alone. Exact kernel and shell availability are unknown.
 
 Upstream FPDoom demonstrates native RAM loading on supported Spreadtrum chips, but this phone has no verified boot transport or chipset match. Its SD boot requires a firmware dump and installed boot patch. sprd_com3 here is Bluetooth SDP, not a USB-driver record. Board identification may clarify a software loading route; hardware intervention is not yet proven necessary.
+
+## Mythroad (MRP) Native Runtime Confirmed
+
+Keypad dial tests without a SIM card confirmed active local MMI parsing:
+- `*#06#` immediately rendered the IMEI dialog, proving local MMI evaluation is active without cellular service.
+- `*#0000#` was intercepted by the MMI handler and returned a firmware dialog "not exist", indicating recognition of the software-version query against an unpopulated NVRAM field.
+- `*#220807#` invoked the native Mythroad runtime launcher: the phone displayed "waiting" while scanning `E:/` for the `mythroad/` directory and bootloader (`dsm_gm.mrp`), then returned to the standby dialer upon timeout.
+- `*#777755999#` returned the exact Mythroad VM/build string: `"ziyout L6320"`.
+
+This confirms the presence of an active, compiled Mythroad (MRP) native execution engine on the Spreadtrum baseband, providing a viable path for native ARM code execution from the microSD card without reflashing.

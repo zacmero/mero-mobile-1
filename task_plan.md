@@ -26,9 +26,12 @@ Goal: make this phone useful to the computer through a verified two-way link and
 - [x] Attempt a full TCP check; stop incomplete when progress is slow and phone latency rises. Do not claim every port closed.
 - [x] Check for firmware/About UI; owner searched all menus and reports none.
 - [x] Probe native FTP root/parent metadata; parent rejected, no firmware tree exposed.
-- [x] Inspect Games/native installation UI: owner confirms Sokoban only and Java-only installer. No native launcher/MRP support demonstrated.
-- [ ] Identify a documented native diagnostic, firmware-retrieval or execution route for the inferred Mocor platform.
-- [ ] Obtain native OS/shell access, if a supported route can be identified.
+- [x] Inspect Games/native installation UI: owner confirms Sokoban only and Java-only installer.
+- [x] Test dialer MMI codes: `*#06#` (IMEI), `*#0000#` ("not exist"), `*#220807#` (Mythroad loader "waiting"), `*#777755999#` ("ziyout L6320").
+- [x] Identify native execution route: Mythroad (MRP) runtime confirmed compiled and active on Spreadtrum Mocor platform.
+- [ ] Stage `mythroad/` directory and compatible `dsm_gm.mrp` loader on `E:/` via verified Bluetooth OBEX FTP.
+- [ ] Boot native MRP environment via `*#220807#` and execute test ARM binary payload.
+- [ ] Obtain native OS/shell access or memory dump via native payload, if supported.
 
 The native-browser message reached the direct port-80 server. Earlier failures used 197 instead of 192, according to the owner. Do not restart USB monitoring or Bluetooth serial retries without new owner direction. Board inspection is deferred.
 

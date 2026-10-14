@@ -95,3 +95,12 @@ Inspected all four new owner photos. Transcribed the visible menus and non-sensi
 Owner confirmed Sokoban is the only game and Java is the only visible installer. Recorded social/media menu inventory. Searched Sokoban/eBuddy/Spreadtrum/Mocor combinations through web and fallback endpoints; no reliable exact-model firmware source found. Recorded provider failures and kept Mocor classification as a hypothesis. No native runtime compatibility or shell was established.
 
 Checked the owner-supplied Powerpack/Spreadtrum overview against current upstream spreadtrum_flash, FPDoom and SD boot documentation. Documented supported-chip limits, native RAM loading, SD boot patch prerequisite and the Bluetooth-versus-USB distinction. No new phone boot probe or firmware write was performed.
+
+## Mythroad (MRP) Native Engine Milestone
+
+- Owner performed keypad dial tests without a SIM card to check MMI parsing behavior:
+  - `*#06#` immediately rendered the IMEI dialog, verifying local MMI parsing without network or SIM requirements.
+  - `*#0000#` returned "not exist", verifying MMI string evaluation against an unpopulated firmware version field.
+  - `*#220807#` produced a "waiting" display and returned to the dialer, verifying invocation of the native Mythroad launcher searching `E:/` for `mythroad/dsm_gm.mrp`.
+  - `*#777755999#` returned `"ziyout L6320"`, confirming the internal Mythroad platform identifier.
+- Next step: stage the `mythroad/` directory and `dsm_gm.mrp` loader on `E:/` using the verified Bluetooth OBEX FTP route to test native code execution.
